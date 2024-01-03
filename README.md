@@ -30,10 +30,11 @@ poetry install
 ## Partial Observability
 Partial observability is accounted for in CFRM by designating **aliased** nodes.  The simplest adversarial game that demonstrates partial observability is Rock-Paper-Scissors.  In Rock-Paper-Scissors the agent must optimize his decision process against an opponent's decision space that is partially observable (i.e. the agent does not know which state it is in).
 
+To see an example of partial observability in action see [**here**](https://drive.google.com/file/d/1Z9IIOUuyM3wpZSTl5hxbEmediSaOe3-z/view?usp=share_link)
 
 <figure>
     <p align="center">
-    <img src="https://drive.google.com/uc?export=view&id=1Z9IIOUuyM3wpZSTl5hxbEmediSaOe3-z" alt="drawing" width="1000"/>
+    <img src="docs/pics/aliasing.png" alt="drawing" width="1000"/>
     </p>
 </figure>
 
