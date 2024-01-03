@@ -1,0 +1,65 @@
+# Example configuration for Black.
+
+[tool.pytest.ini_options]
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+
+[tool.black]
+line-length = 100
+target-version = ['py39']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.idea
+  | \.mypy_cache
+  | \.pytest_cache
+  | \.tox
+  | \.venv
+  | \.vscode
+  | \.nox
+  | \docs
+  | _build
+  | buck-out
+  | build
+  | dist
+  # The following are specific to Black, you probably don't want those.
+  | blib2to3
+  | tests/data
+  | profiling
+)/
+'''
+
+[tool.poetry]
+name = "dentro"
+version = "0.1.0"
+description = ""
+authors = ["William Li <william.li1@me.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+networkx = "^3.1"
+ray = "^2.7.1"
+matplotlib = "^3.8.0"
+numpy = "^1.26.0"
+rich = "^13.6.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "*"
+coverage = "*"
+mypy = "*"
+nox = "*"
+pdoc = "*"
+pre-commit = "*"
+pytest = "*"
+scalene = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

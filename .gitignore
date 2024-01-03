@@ -1,0 +1,18 @@
+# Files to ignore
+*.pyc
+.coverage
+.DS_Store
+*.mp4
+*.pptx
+*.excalidraw
+profile.html
+profile.json
+poetry.lock
+
+# Folders to ignore
+__pycache__
+.mypy_cache
+.nox
+.pytest_cache
+html
+save
