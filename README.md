@@ -87,4 +87,3 @@ pytest
 
 # ✨ References
 * Neller, T. W., & Lanctot, M. (2013). An Introduction to Counterfactual Regret Minimization. Educational Advances in Artificial Intelligence. http://modelai.gettysburg.edu/2013/cfr/cfr.pdf
-

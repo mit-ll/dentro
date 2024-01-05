@@ -1,58 +1,37 @@
+import math
+import time
+
+import networkx as nx
+from bokeh.models import BoxSelectTool
+from bokeh.models import Circle
+from bokeh.models import EdgesAndLinkedNodes
+from bokeh.models import Ellipse
+from bokeh.models import GraphRenderer
+from bokeh.models import HoverTool
+from bokeh.models import MultiLine
+from bokeh.models import NodesAndAdjacentNodes
+from bokeh.models import NodesAndLinkedEdges
+from bokeh.models import PanTool
+from bokeh.models import Plot
+from bokeh.models import Range1d
+from bokeh.models import ResetTool
+from bokeh.models import StaticLayoutProvider
+from bokeh.models import TapTool
+from bokeh.models import WheelZoomTool
+from bokeh.palettes import Plasma256
+from bokeh.palettes import Spectral4
+from bokeh.palettes import Spectral8
+from bokeh.plotting import figure
+from bokeh.plotting import from_networkx
+from bokeh.plotting import show
 from networkx import bfs_edges
 from rich.traceback import install
-import time
-from src.games import rock_paper_scissors, rock_paper_scissors_int
+
+from src.games import rock_paper_scissors
+from src.games import rock_paper_scissors_int
 from src.plot import graph_tree
-from src.plot import show_plot
-from bokeh.models import (
-    BoxSelectTool,
-    Circle,
-    HoverTool,
-    MultiLine,
-    NodesAndLinkedEdges,
-    Plot,
-    Range1d,
-    TapTool,
-)
 from src.plot import hierarchy_pos
-from bokeh.palettes import Spectral4
-from bokeh.plotting import from_networkx, show
-import networkx as nx
-import math
-from bokeh.plotting import figure, show
-from bokeh.models import GraphRenderer, Ellipse, StaticLayoutProvider
-from bokeh.palettes import Spectral8, Plasma256
-import networkx as nx
-import networkx as nx
-
-from bokeh.models import (
-    BoxSelectTool,
-    Circle,
-    HoverTool,
-    MultiLine,
-    NodesAndAdjacentNodes,
-    Plot,
-    Range1d,
-    TapTool,
-    PanTool,
-    WheelZoomTool,
-    ResetTool,
-)
-from bokeh.palettes import Spectral4
-from bokeh.plotting import from_networkx, show
-
-from bokeh.models import (
-    BoxSelectTool,
-    Circle,
-    EdgesAndLinkedNodes,
-    HoverTool,
-    MultiLine,
-    Plot,
-    Range1d,
-    TapTool,
-)
-from bokeh.palettes import Spectral4
-from bokeh.plotting import from_networkx, show
+from src.plot import show_plot
 
 
 install(show_locals=True)
