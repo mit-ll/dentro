@@ -25,7 +25,7 @@
     "editor.rulers": [
         100
     ],
-    "editor.wordWrap": "wordWrapColumn",
+    // "editor.wordWrap": "wordWrapColumn",
     "editor.wordWrapColumn": 100,
     "___________________________Configs___________________________": "",
     "python.envFile": "${workspaceFolder}/.vscode/.env",
