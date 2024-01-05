@@ -21,12 +21,20 @@ from src.ci.utils import coverage as ci_coverage
 from src.ci.utils import profile as ci_profile
 
 
-@nox.session(python=["3.8", "3.9", "3.10"])
+@nox.session(python=["3.10"])
 def pytest(session):
     """Run PyTests."""
 
     session.run("poetry", "install", "--with=dev", external=True)
     session.run("pytest", "-v")
+
+
+@nox.session
+def pytest_cov(session):
+    """Run PyTests with coverage."""
+
+    session.run("poetry", "install", "--with=dev", external=True)
+    session.run("pytest", "--cov=./", "--cov-report=html:save/pytest-cov")
 
 
 @nox.session

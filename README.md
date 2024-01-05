@@ -1,16 +1,25 @@
-<figure>
-    <p align="center">
-    <img src="https://drive.google.com/uc?export=view&id=1yFte-RASCcF1ahkYg1Jybavi-gWje8kp" alt="drawing" width="600"/>
-    </p>
-</figure>
+<p align="center">
+  <a href="https://github.com/destin-v"><img src="https://drive.google.com/uc?export=view&id=1yFte-RASCcF1ahkYg1Jybavi-gWje8kp" alt="drawing" width="500"/></a>
+</p>
 
 # 📒 Description
-<figure>
-    <p align="center">
+
+<p align="center">
     <img src="docs/pics/program_logo.png" alt="drawing" width="200"/>
-    </p>
-  <figcaption align = "center"></figcaption>
-</figure>
+</p>
+
+<p align="center">
+  <a href="https://devguide.python.org/versions/">              <img alt="" src="https://img.shields.io/badge/python-^3.10-blue?logo=python&logoColor=white"></a>
+  <a href="https://black.readthedocs.io/en/stable/index.html">  <img alt="" src="https://img.shields.io/badge/code%20style-black-blue"></a>
+  <img alt="" src="https://img.shields.io/badge/license-mit-mediumturquoise">
+</p>
+
+<p align="center">
+  <a href="https://pre-commit.com">                             <img alt="" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit"></a>
+  <a href="https://pytest.org">                                 <img alt="" src="https://img.shields.io/badge/pytest-enabled-brightgreen?logo=pytest&logoColor=white"></a>
+  <a href="https://pdoc.dev">                                   <img alt="" src="https://img.shields.io/badge/pdoc-enabled-brightgreen?logo=googledocs&logoColor=white"></a>
+  <img alt="" src="https://github.com/destin-v/dentro/actions/workflows/ci.yml/badge.svg">
+</p>
 
 Dentro is an implementation of Counter Factual Regret Minimization (CFRM).  It provides the basic building blocks needed to assemble your own graphs and solve the problem using the provided algorithm.  Games that have been solved with CFRM include: (1) Poker, (2) Texas Holdem, (3) Black Jack, etc.
 
@@ -32,14 +41,12 @@ Partial observability is accounted for in CFRM by designating **aliased** nodes.
 
 To see an example of partial observability in action see [**here**](https://drive.google.com/file/d/1Z9IIOUuyM3wpZSTl5hxbEmediSaOe3-z/view?usp=share_link)
 
-<figure>
-    <p align="center">
+<p align="center">
     <img src="docs/pics/aliasing.png" alt="drawing" width="1000"/>
-    </p>
-</figure>
+</p>
 
 <p align="center">
-<b>Fig 1: Rock Paper Scissor game represented as a game tree with terminal rewards.  The dashed lines indicated aliased states (meaning these states are indistinguishable from another).</b>
+    <b>Fig 1: Rock Paper Scissor game represented as a game tree with terminal rewards.  The dashed lines indicated aliased states (meaning these states are indistinguishable from another).</b>
 </p>
 
 ## Ray Integration
