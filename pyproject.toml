@@ -49,6 +49,7 @@ ray = "^2.7.1"
 matplotlib = "^3.8.0"
 numpy = "^1.26.0"
 rich = "^13.6.0"
+bokeh = "^3.3.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
@@ -58,6 +59,7 @@ nox = "*"
 pdoc = "*"
 pre-commit = "*"
 pytest = "*"
+pytest-cov = "*"
 scalene = "*"
 
 [build-system]
