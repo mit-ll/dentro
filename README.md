@@ -15,10 +15,10 @@
 </p>
 
 <p align="center">
-  <a href="https://pre-commit.com">                             <img alt="" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit"></a>
-  <a href="https://pytest.org">                                 <img alt="" src="https://img.shields.io/badge/pytest-enabled-brightgreen?logo=pytest&logoColor=white"></a>
-  <a href="https://pdoc.dev">                                   <img alt="" src="https://img.shields.io/badge/pdoc-enabled-brightgreen?logo=googledocs&logoColor=white"></a>
-  <img alt="" src="https://github.com/destin-v/dentro/actions/workflows/ci.yml/badge.svg">
+  <a href="https://pre-commit.com">                                       <img alt="" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit"></a>
+  <a href="https://pytest.org">                                           <img alt="" src="https://img.shields.io/badge/pytest-enabled-brightgreen?logo=pytest&logoColor=white"></a>
+  <a href="https://pdoc.dev">                                             <img alt="" src="https://img.shields.io/badge/pdoc-enabled-brightgreen?logo=googledocs&logoColor=white"></a>
+  <a href="https://github.com/destin-v/dentro/actions/workflows/ci.yml">  <img alt="" src="https://github.com/destin-v/dentro/actions/workflows/ci.yml/badge.svg"></a>
 </p>
 
 Dentro is an implementation of Counter Factual Regret Minimization (CFRM).  It provides the basic building blocks needed to assemble your own graphs and solve the problem using the provided algorithm.  Games that have been solved with CFRM include: (1) Poker, (2) Texas Holdem, (3) Black Jack, etc.
