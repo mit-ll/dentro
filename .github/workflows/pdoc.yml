@@ -51,7 +51,7 @@ jobs:
       - name: Generate pdoc artifact
         run: |
           mkdir -p save/pdocs
-          export PYTHONPATH=/home/runner/work/vs_codex/vs_codex/
+          export PYTHONPATH=/home/runner/work/dentro/dentro/
           nox -r -s pdoc
       # Upload the artifact to the next job
       - name: Upload pdoc artifact
