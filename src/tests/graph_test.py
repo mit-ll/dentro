@@ -1,11 +1,6 @@
-import math
-import time
-
-import networkx as nx
 from bokeh.models import BoxSelectTool
 from bokeh.models import Circle
 from bokeh.models import EdgesAndLinkedNodes
-from bokeh.models import Ellipse
 from bokeh.models import GraphRenderer
 from bokeh.models import HoverTool
 from bokeh.models import MultiLine
@@ -13,16 +8,14 @@ from bokeh.models import NodesAndAdjacentNodes
 from bokeh.models import NodesAndLinkedEdges
 from bokeh.models import PanTool
 from bokeh.models import Plot
-from bokeh.models import Range1d
 from bokeh.models import ResetTool
 from bokeh.models import StaticLayoutProvider
+from bokeh.models import TabPanel
+from bokeh.models import Tabs
 from bokeh.models import TapTool
 from bokeh.models import WheelZoomTool
 from bokeh.palettes import Plasma256
 from bokeh.palettes import Spectral4
-from bokeh.palettes import Spectral8
-from bokeh.plotting import figure
-from bokeh.plotting import from_networkx
 from bokeh.plotting import show
 from networkx import bfs_edges
 from rich.traceback import install
@@ -32,7 +25,6 @@ from src.games import rock_paper_scissors_int
 from src.plot import graph_tree
 from src.plot import hierarchy_pos
 from src.plot import show_plot
-
 
 install(show_locals=True)
 
@@ -78,51 +70,59 @@ def test_bokeh_rps():
     G = rock_paper_scissors_int()
     pos_dict = hierarchy_pos(G, 1000)
 
+    # TODO: Add aliasing into the networkx graph!
+
     ## ------- Add interactive functions ------
-    plot_NodesAndLinkedEdges(G, pos_dict)
-    time.sleep(1)
-    plot_EdgesAndLinkedNodes(G, pos_dict)
-    time.sleep(1)
-    plot_NodesAndAdjacentNodes(G, pos_dict)
+    plot1 = plot_NodesAndLinkedEdges(G, pos_dict)
+    plot2 = plot_EdgesAndLinkedNodes(G, pos_dict)
+    plot3 = plot_NodesAndAdjacentNodes(G, pos_dict)
+
+    # Create tabs
+    tab1 = TabPanel(child=plot1, title="Nodes and Linked Edges")
+    tab2 = TabPanel(child=plot2, title="Edges and Linked Nodes")
+    tab3 = TabPanel(child=plot3, title="Nodes and Adjacent Nodes")
+
+    # Generate the plot
+    show(Tabs(tabs=[tab1, tab2, tab3], sizing_mode="scale_both"))
 
 
-def plot_NodesAndLinkedEdges(G, pos_dict):
+def plot_NodesAndLinkedEdges(G, pos_dict) -> Plot:
     graph_renderer = preprocess(G, pos_dict)
     graph_renderer.selection_policy = NodesAndLinkedEdges()
     graph_renderer.inspection_policy = NodesAndLinkedEdges()
 
-    plot = Plot(width=1200, height=600)
+    plot = Plot(sizing_mode="scale_both")
     plot.title.text = "Graph Interaction - Nodes & Linked Edge"
     plot.add_tools(HoverTool(), TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
     plot.renderers.append(graph_renderer)
 
-    show(plot)
+    return plot
 
 
-def plot_EdgesAndLinkedNodes(G, pos_dict):
+def plot_EdgesAndLinkedNodes(G, pos_dict) -> Plot:
     graph_renderer = preprocess(G, pos_dict)
     graph_renderer.selection_policy = EdgesAndLinkedNodes()
     graph_renderer.inspection_policy = EdgesAndLinkedNodes()
 
-    plot = Plot(width=1200, height=600)
+    plot = Plot(sizing_mode="scale_both")
     plot.title.text = "Graph Interaction - Edges & Linked Nodes"
     plot.add_tools(HoverTool(), TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
     plot.renderers.append(graph_renderer)
 
-    show(plot)
+    return plot
 
 
-def plot_NodesAndAdjacentNodes(G, pos_dict):
+def plot_NodesAndAdjacentNodes(G, pos_dict) -> Plot:
     graph_renderer = preprocess(G, pos_dict)
     graph_renderer.selection_policy = NodesAndAdjacentNodes()
     graph_renderer.inspection_policy = NodesAndAdjacentNodes()
 
-    plot = Plot(width=1200, height=600)
+    plot = Plot(sizing_mode="scale_both")
     plot.title.text = "Graph Interaction - Nodes & Adjacent Nodes"
     plot.add_tools(HoverTool(), TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
     plot.renderers.append(graph_renderer)
 
-    show(plot)
+    return plot
 
 
 def preprocess(G, pos_dict):
@@ -143,10 +143,11 @@ def preprocess(G, pos_dict):
 
     # This renders the edges between nodes
     graph_renderer.edge_renderer.data_source.data = dict(start=start, end=end)
+
     # This renders the positions of the nodes
     graph_renderer.layout_provider = StaticLayoutProvider(graph_layout=pos_dict)
 
-    graph_renderer.node_renderer.glyph = Circle(size=15, fill_color=Spectral4[0])
+    graph_renderer.node_renderer.glyph = Circle(size=30, fill_color=Spectral4[0])
     graph_renderer.node_renderer.selection_glyph = Circle(size=15, fill_color=Spectral4[2])
     graph_renderer.node_renderer.hover_glyph = Circle(size=15, fill_color=Spectral4[1])
 
