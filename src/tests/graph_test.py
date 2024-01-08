@@ -74,8 +74,8 @@ def test_bokeh_rps():
 
     ## ------- Add interactive functions ------
     plot1 = plot_NodesAndLinkedEdges(G, pos_dict)
-    plot2 = plot_EdgesAndLinkedNodes(G, pos_dict)
-    plot3 = plot_NodesAndAdjacentNodes(G, pos_dict)
+    plot2 = plot_EdgesAndLinkedNodes(G, pos_dict, plot1)
+    plot3 = plot_NodesAndAdjacentNodes(G, pos_dict, plot1)
 
     # Create tabs
     tab1 = TabPanel(child=plot1, title="Nodes and Linked Edges")
@@ -99,12 +99,12 @@ def plot_NodesAndLinkedEdges(G, pos_dict) -> Plot:
     return plot
 
 
-def plot_EdgesAndLinkedNodes(G, pos_dict) -> Plot:
+def plot_EdgesAndLinkedNodes(G, pos_dict, linked_plot) -> Plot:
     graph_renderer = preprocess(G, pos_dict)
     graph_renderer.selection_policy = EdgesAndLinkedNodes()
     graph_renderer.inspection_policy = EdgesAndLinkedNodes()
 
-    plot = Plot(sizing_mode="scale_both")
+    plot = Plot(sizing_mode="scale_both", x_range=linked_plot.x_range, y_range=linked_plot.y_range)
     plot.title.text = "Graph Interaction - Edges & Linked Nodes"
     plot.add_tools(HoverTool(), TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
     plot.renderers.append(graph_renderer)
@@ -112,12 +112,12 @@ def plot_EdgesAndLinkedNodes(G, pos_dict) -> Plot:
     return plot
 
 
-def plot_NodesAndAdjacentNodes(G, pos_dict) -> Plot:
+def plot_NodesAndAdjacentNodes(G, pos_dict, linked_plot) -> Plot:
     graph_renderer = preprocess(G, pos_dict)
     graph_renderer.selection_policy = NodesAndAdjacentNodes()
     graph_renderer.inspection_policy = NodesAndAdjacentNodes()
 
-    plot = Plot(sizing_mode="scale_both")
+    plot = Plot(sizing_mode="scale_both", x_range=linked_plot.x_range, y_range=linked_plot.y_range)
     plot.title.text = "Graph Interaction - Nodes & Adjacent Nodes"
     plot.add_tools(HoverTool(), TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
     plot.renderers.append(graph_renderer)
