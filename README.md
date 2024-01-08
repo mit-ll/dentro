@@ -11,27 +11,15 @@
 </p>
 
 <p align="center">
-  <a href="https://devguide.python.org/versions/">
-    <img alt="python-version" src="https://img.shields.io/badge/python-^3.10-blue?logo=python&logoColor=white">
-  </a>
-  <a href="https://black.readthedocs.io/en/stable/index.html">
-    <img alt="code-style" src="https://img.shields.io/badge/code%20style-black-blue">
-  </a>
-  <a href="https://mit-license.org">
-    <img alt="license" src="https://img.shields.io/badge/license-mit-mediumturquoise">
-  </a>
+  <a href="https://devguide.python.org/versions/">              <img alt="" src="https://img.shields.io/badge/python-^3.10-blue?logo=python&logoColor=white"></a>
+  <a href="https://docs.github.com/en/actions/quickstart">      <img alt="" src="https://img.shields.io/badge/CI-github-blue?logo=github&logoColor=white"></a>
+  <a href="https://black.readthedocs.io/en/stable/index.html">  <img alt="" src="https://img.shields.io/badge/code%20style-black-blue"></a>
 </p>
 
 <p align="center">
-  <a href="https://pre-commit.com">
-    <img alt="pre-commit" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit">
-  </a>
-  <a href="https://destin-v.github.io/dentro/src.html">
-    <img alt="pdoc" src="https://github.com/destin-v/dentro/actions/workflows/pdoc.yml/badge.svg">
-  </a>
-  <a href="https://github.com/destin-v/dentro/actions/workflows/pytest.yml">
-    <img alt="pytest" src="https://github.com/destin-v/dentro/actions/workflows/pytest.yml/badge.svg">
-  </a>
+  <a href="https://pre-commit.com">                                             <img alt="pre-commit" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit"></a>
+  <a href="https://destin-v.github.io/dentro/src.html">                       <img alt="pdoc" src="https://github.com/destin-v/dentro/actions/workflows/pdoc.yml/badge.svg"></a>
+  <a href="https://github.com/destin-v/dentro/actions/workflows/pytest.yml">  <img alt="pytest" src="https://github.com/destin-v/dentro/actions/workflows/pytest.yml/badge.svg"></a>
 </p>
 
 Dentro is an implementation of Counter Factual Regret Minimization (CFRM).  It provides the basic building blocks needed to assemble your own graphs and solve the problem using the provided algorithm.  Games that have been solved with CFRM include: (1) Poker, (2) Texas Holdem, (3) Black Jack, etc.
