@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <a href="https://pre-commit.com">                                             <img alt="pre-commit" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit"></a>
+  <a href="https://pre-commit.com">                                           <img alt="pre-commit" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit"></a>
   <a href="https://destin-v.github.io/dentro/src.html">                       <img alt="pdoc" src="https://github.com/destin-v/dentro/actions/workflows/pdoc.yml/badge.svg"></a>
   <a href="https://github.com/destin-v/dentro/actions/workflows/pytest.yml">  <img alt="pytest" src="https://github.com/destin-v/dentro/actions/workflows/pytest.yml/badge.svg"></a>
 </p>
