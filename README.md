@@ -1,5 +1,7 @@
 <p align="center">
-  <a href="https://github.com/destin-v"><img src="https://drive.google.com/uc?export=view&id=1yFte-RASCcF1ahkYg1Jybavi-gWje8kp" alt="drawing" width="500"/></a>
+  <a href="https://github.com/destin-v">
+    <img src="https://drive.google.com/uc?export=view&id=1yFte-RASCcF1ahkYg1Jybavi-gWje8kp" alt="drawing" width="500"/>
+  </a>
 </p>
 
 # 📒 Description
@@ -9,16 +11,27 @@
 </p>
 
 <p align="center">
-  <a href="https://devguide.python.org/versions/">              <img alt="" src="https://img.shields.io/badge/python-^3.10-blue?logo=python&logoColor=white"></a>
-  <a href="https://black.readthedocs.io/en/stable/index.html">  <img alt="" src="https://img.shields.io/badge/code%20style-black-blue"></a>
-  <img alt="" src="https://img.shields.io/badge/license-mit-mediumturquoise">
+  <a href="https://devguide.python.org/versions/">
+    <img alt="python-version" src="https://img.shields.io/badge/python-^3.10-blue?logo=python&logoColor=white">
+  </a>
+  <a href="https://black.readthedocs.io/en/stable/index.html">
+    <img alt="code-style" src="https://img.shields.io/badge/code%20style-black-blue">
+  </a>
+  <a href="https://mit-license.org">
+    <img alt="license" src="https://img.shields.io/badge/license-mit-mediumturquoise">
+  </a>
 </p>
 
 <p align="center">
-  <a href="https://pre-commit.com">                                       <img alt="" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit"></a>
-  <a href="https://pytest.org">                                           <img alt="" src="https://img.shields.io/badge/pytest-enabled-brightgreen?logo=pytest&logoColor=white"></a>
-  <a href="https://pdoc.dev">                                             <img alt="" src="https://img.shields.io/badge/pdoc-enabled-brightgreen?logo=googledocs&logoColor=white"></a>
-  <a href="https://github.com/destin-v/dentro/actions/workflows/ci.yml">  <img alt="" src="https://github.com/destin-v/dentro/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://pre-commit.com">
+    <img alt="pre-commit" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit">
+  </a>
+  <a href="https://destin-v.github.io/dentro/src.html">
+    <img alt="pdoc" src="https://github.com/destin-v/dentro/actions/workflows/pdoc.yml/badge.svg">
+  </a>
+  <a href="https://github.com/destin-v/dentro/actions/workflows/pytest.yml">
+    <img alt="pytest" src="https://github.com/destin-v/dentro/actions/workflows/pytest.yml/badge.svg">
+  </a>
 </p>
 
 Dentro is an implementation of Counter Factual Regret Minimization (CFRM).  It provides the basic building blocks needed to assemble your own graphs and solve the problem using the provided algorithm.  Games that have been solved with CFRM include: (1) Poker, (2) Texas Holdem, (3) Black Jack, etc.
@@ -29,8 +42,8 @@ Nodes represent game states and edges represent possible decisions paths.  The a
 # 📦 Installation
 
 ```terminal
-conda create -n cfrm python=3.10
-conda activate cfrm
+conda create -n dentro python=3.10
+conda activate dentro
 pip install poetry
 poetry install
 ```
