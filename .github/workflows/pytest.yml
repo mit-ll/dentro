@@ -1,10 +1,9 @@
 #===================================================================================================
 #
-#   DESCRIPTION:  Template for continuous integration using Github actions.  This workflow will
-#                 install Python dependencies and run tests with a variety of Python versions.
+#   DESCRIPTION:  Runs pytests with multiple versions of python.
 #        AUTHOR:  W. Li
 #       VERSION:  1.0
-#       CREATED:  1/5/2024
+#       CREATED:  1/6/2024
 #
 # References:
 # * https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-pythonCommon
@@ -13,9 +12,6 @@
 
 name: pytests
 
-#----------------------------------------------
-# Set the OS and python versions
-#----------------------------------------------
 on:
   # Configure the branches you want Github actions to run on.
   # Leave blank if you want to run on all branches.
