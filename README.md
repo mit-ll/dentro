@@ -22,7 +22,7 @@
   <a href="https://github.com/destin-v/dentro/actions/workflows/pytest.yml">      <img alt="pytest" src="https://github.com/destin-v/dentro/actions/workflows/pytest.yml/badge.svg"></a>
 </p>
 
-Dentro is an implementation of Counter Factual Regret Minimization (CFRM).  It provides the basic building blocks needed to assemble your own graphs and solve the problem using the provided algorithm.  Games that have been solved with CFRM include: (1) Poker, (2) Texas Holdem, (3) Black Jack, etc.
+Dentro is an implementation of Counter Factual Regret Minimization (CFRM).  It provides the basic building blocks needed to assemble your own graphs and solve the problem using the provided algorithm.  This repo shows CFRM applied to the game of rock-paper-scissors.
 
 Nodes represent game states and edges represent possible decisions paths.  The agents greedily selects the decision paths that have the highest expected value.  However, the expected values changed based on the decision probabilities of itself as well as its opponent.  The probabilities and expected value will change over time as the agents learns how to optimize their play.
 
