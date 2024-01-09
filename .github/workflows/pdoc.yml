@@ -1,4 +1,15 @@
-# Simple workflow for deploying static content to GitHub Pages
+#===================================================================================================
+#
+#   DESCRIPTION:  Generate pdocs and pushes them to Git Pages.
+#        AUTHOR:  W. Li
+#       VERSION:  1.0
+#       CREATED:  1/6/2024
+#
+# References:
+# * https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-pythonCommon
+#
+#===================================================================================================
+
 name: pdocs
 
 on:

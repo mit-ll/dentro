@@ -1,0 +1,26 @@
+#===================================================================================================
+#
+#   DESCRIPTION:  Run pre-commit on all files in repo.
+#        AUTHOR:  W. Li
+#       VERSION:  1.0
+#       CREATED:  1/6/2024
+#
+# References:
+# * https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-pythonCommon
+#
+#===================================================================================================
+
+name: pre-commit
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+    - uses: pre-commit/action@v3.0.0
