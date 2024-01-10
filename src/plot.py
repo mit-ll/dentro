@@ -12,39 +12,44 @@ from matplotlib.lines import Line2D
 MIN_EDGE_WIDTH = 0.2
 
 
-def format_nodes(G: nx.Graph, pos: dict):
-    """Format the node colors based on the prefix of the node's name.
-
-    ### TODO: This should probably be done in the data of the node instead.
+def get_node_attrs(G: nx.Graph) -> tuple[list, list]:
+    """Get the node attributes based on user settings.
 
     Args:
-        G (nx.Graph): Networkx graph.
-        pos (dict): Position of every node in `(x, y)` coordinates.
+        G (nx.Graph): The networkx graph.
+
+    Returns:
+        tuple[list, list]: ids, colors
     """
     # Configure node properties
+    node_ids = []
     node_colors = []
-    for name, _ in G.nodes(data=True):
-        if name[0] == "R":
+
+    for node_id in G.nodes():
+        node_ids.append(node_id)
+
+        if node_id[0] == "R":
             node_colors.append("mistyrose")
-        elif name[0] == "T":
+        elif node_id[0] == "T":
             node_colors.append("lightgrey")
-        elif name[0] == "B":
+        elif node_id[0] == "B":
             node_colors.append("lightcyan")
         else:
             node_colors.append("navajowhite")
 
-    # Plot nodes
-    nx.draw_networkx_nodes(G, pos, node_size=500, node_color=node_colors, edgecolors="black")
-    nx.draw_networkx_labels(G, pos, font_size=12, font_family="sans-serif")
+    return node_ids, node_colors
 
 
-def format_edges(G: nx.Graph, pos: dict):
-    """Formats the edges based on player type and user settings.
+def get_edge_attrs(G: nx.Graph) -> tuple[list, list, list]:
+    """Get the edge attribtues.  These are based on user settings.
 
     Args:
-        G (nx.Graph): Networkx graph.
-        pos (dict): Position of every node in `(x, y)` coordinates.
+        G (nx.Graph): The networkx graph.
+
+    Returns:
+        tuple[list, list, list]: edges, colors, widths
     """
+
     # Configure edge properties
     eps = np.spacing(np.float32(1.0))
     edge_links = []
@@ -63,7 +68,37 @@ def format_edges(G: nx.Graph, pos: dict):
         elif data["player"] == "blue":
             edge_colors.append("blue")
         else:
-            edge_colors.append("orange")
+            edge_colors.append("grey")
+
+    return edge_links, edge_colors, edge_widths
+
+
+def format_nodes(G: nx.Graph, pos: dict):
+    """Format the node colors based on the prefix of the node's name.
+
+    ### TODO: This should probably be done in the data of the node instead.
+
+    Args:
+        G (nx.Graph): Networkx graph.
+        pos (dict): Position of every node in `(x, y)` coordinates.
+    """
+
+    _, node_colors = get_node_attrs(G)
+
+    # Plot nodes
+    nx.draw_networkx_nodes(G, pos, node_size=500, node_color=node_colors, edgecolors="black")
+    nx.draw_networkx_labels(G, pos, font_size=12, font_family="sans-serif")
+
+
+def format_edges(G: nx.Graph, pos: dict):
+    """Formats the edges based on player type and user settings.
+
+    Args:
+        G (nx.Graph): Networkx graph.
+        pos (dict): Position of every node in `(x, y)` coordinates.
+    """
+    # Configure edge properties
+    edge_links, edge_colors, edge_widths = get_edge_attrs(G)
 
     # Plot edges
     nx.draw_networkx_edges(

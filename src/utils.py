@@ -1,6 +1,9 @@
+import math
+
 import networkx as nx
 import numpy as np
 import ray
+from networkx import relabel_nodes
 
 
 @ray.remote
@@ -76,3 +79,65 @@ def load_aliases(G: nx.Graph) -> dict[str, dict]:
                 data["s"] = link
 
     return alias_edges
+
+
+def relabel_nodes_str2int(G: nx.Graph) -> nx.Graph:
+    """Convert Graph names from `str` to `int`.
+
+    Returns:
+        nx.Graph: All nodes as assigned integers as names.
+    """
+
+    # We need to remap all string values to integer equivalents
+    mapping = {}
+    for node in G.nodes():
+        name_int = convertToNumber(node)
+        name_str = node
+        mapping[name_str] = name_int
+
+    G = relabel_nodes(G, mapping, copy=True)
+
+    return G
+
+
+def relabel_nodes_int2str(G: nx.Graph) -> nx.Graph:
+    """Convert Graph names from `int` to `str`.
+
+    Returns:
+        nx.Graph: All nodes as assigned string names.
+    """
+
+    # We need to remap all string values to integer equivalents
+    mapping = {}
+    for node in G.nodes():
+        name_int = node
+        name_str = convertFromNumber(name_int)
+        mapping[name_int] = name_str
+
+    G_str = relabel_nodes(G, mapping, copy=True)
+
+    return G_str
+
+
+def convertToNumber(s: str) -> int:
+    """Method for converting a string into a unique number.  The process converts string `bytes` into `int`.
+
+    Args:
+        s (str): A string.
+
+    Returns:
+        int: An integer
+    """
+    return int.from_bytes(s.encode(), "little")
+
+
+def convertFromNumber(n: int) -> str:
+    """Converts a integer to a string.
+
+    Args:
+        n (int): An integer.
+
+    Returns:
+        str: The matching string representation.
+    """
+    return n.to_bytes(math.ceil(n.bit_length() / 8), "little").decode()

@@ -1,3 +1,5 @@
+import networkx as nx
+from bokeh.model import Model
 from bokeh.models import BoxSelectTool
 from bokeh.models import Circle
 from bokeh.models import EdgesAndLinkedNodes
@@ -13,18 +15,24 @@ from bokeh.models import StaticLayoutProvider
 from bokeh.models import TabPanel
 from bokeh.models import Tabs
 from bokeh.models import TapTool
+from bokeh.models import Text
 from bokeh.models import WheelZoomTool
-from bokeh.palettes import Plasma256
 from bokeh.palettes import Spectral4
 from bokeh.plotting import show
 from networkx import bfs_edges
+from networkx import Graph
 from rich.traceback import install
 
 from src.games import rock_paper_scissors
-from src.games import rock_paper_scissors_int
+from src.plot import get_edge_attrs
+from src.plot import get_node_attrs
 from src.plot import graph_tree
 from src.plot import hierarchy_pos
 from src.plot import show_plot
+from src.utils import convertFromNumber
+from src.utils import convertToNumber
+from src.utils import relabel_nodes_int2str
+from src.utils import relabel_nodes_str2int
 
 install(show_locals=True)
 
@@ -67,8 +75,8 @@ def test_bokeh_rps():
     """Renders the RPS game using Bokeh instead of Matplotlib.  This provides a HTML experience with interactive features not availble in the standard Matplotlib library."""
 
     # We need a RPS game where all nodes are integers
-    G = rock_paper_scissors_int()
-    pos_dict = hierarchy_pos(G, 1000)
+    G = rock_paper_scissors()
+    pos_dict = hierarchy_pos(G, "root")
 
     # TODO: Add aliasing into the networkx graph!
 
@@ -86,21 +94,22 @@ def test_bokeh_rps():
     show(Tabs(tabs=[tab1, tab2, tab3], sizing_mode="scale_both"))
 
 
-def plot_NodesAndLinkedEdges(G, pos_dict) -> Plot:
-    graph_renderer = preprocess(G, pos_dict)
+def plot_NodesAndLinkedEdges(G: Graph, pos_dict: dict) -> Model:
+    graph_renderer = bokeh_preprocess(G, pos_dict)
     graph_renderer.selection_policy = NodesAndLinkedEdges()
     graph_renderer.inspection_policy = NodesAndLinkedEdges()
 
     plot = Plot(sizing_mode="scale_both")
     plot.title.text = "Graph Interaction - Nodes & Linked Edge"
-    plot.add_tools(HoverTool(), TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
+    hover = HoverTool(tooltips=[("Name:", "@name")])
+    plot.add_tools(hover, TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
     plot.renderers.append(graph_renderer)
 
     return plot
 
 
-def plot_EdgesAndLinkedNodes(G, pos_dict, linked_plot) -> Plot:
-    graph_renderer = preprocess(G, pos_dict)
+def plot_EdgesAndLinkedNodes(G: Graph, pos_dict: dict, linked_plot: Model) -> Model:
+    graph_renderer = bokeh_preprocess(G, pos_dict)
     graph_renderer.selection_policy = EdgesAndLinkedNodes()
     graph_renderer.inspection_policy = EdgesAndLinkedNodes()
 
@@ -112,8 +121,8 @@ def plot_EdgesAndLinkedNodes(G, pos_dict, linked_plot) -> Plot:
     return plot
 
 
-def plot_NodesAndAdjacentNodes(G, pos_dict, linked_plot) -> Plot:
-    graph_renderer = preprocess(G, pos_dict)
+def plot_NodesAndAdjacentNodes(G: Graph, pos_dict: dict, linked_plot: Model) -> Model:
+    graph_renderer = bokeh_preprocess(G, pos_dict)
     graph_renderer.selection_policy = NodesAndAdjacentNodes()
     graph_renderer.inspection_policy = NodesAndAdjacentNodes()
 
@@ -125,36 +134,106 @@ def plot_NodesAndAdjacentNodes(G, pos_dict, linked_plot) -> Plot:
     return plot
 
 
-def preprocess(G, pos_dict):
-    # Set its height, width, and fill_color
-    graph_renderer = GraphRenderer()
-    graph_renderer.node_renderer.glyph = Circle(size=10, fill_color="colors")
+def bokeh_node_colors(G: nx.Graph) -> dict:
+    """Takes a Graph with integer named nodes and assigns colors based on their string representation.
 
-    # assign a palette to ``fill_color`` and add it to the data source
-    graph_renderer.node_renderer.data_source.data = dict(
-        index=list(G.nodes()), fill_color=Plasma256
-    )
+    Args:
+        G (nx.Graph): _description_
 
-    # Assign the edges
+    Returns:
+        dict: Mapping of nodes to colors.
+    """
+
+    # Configure node properties
+    node_colors = {}
+
+    for node in G.nodes():
+        node_str = convertFromNumber(node)
+        if node_str[0] == "R":
+            node_colors[node] = "mistyrose"
+        elif node_str[0] == "T":
+            node_colors[node] = "lightgrey"
+        elif node_str[0] == "B":
+            node_colors[node] = "lightcyan"
+        else:
+            node_colors[node] = "navajowhite"
+
+    return node_colors
+
+
+def bokeh_preprocess(G: Graph, pos_dict: dict) -> GraphRenderer:
+    """The GraphRenderer model maintains separate sub-GlyphRenderers for graph nodes and edges.
+    This lets you customize nodes by modifying the `node_renderer` property of GraphRenderer.
+    Likewise, you can cutomize the edges by modifying the `edge_renderer` property of GraphRenderer.
+
+    In order to customize the nodes and edges you must modify the `ColumnDataSource` directly.  All
+    plotting attributes are dervied from the `ColumnDataSource` which is a custom dictionary.  The
+    renderers must source their values from `ColumnDataSource` when assigning attributes like color,
+    width, etc.
+
+    Args:
+        G (Graph): Networkx Graph.
+        pos_dict (dict): Dictionary with position values for all nodes/edges.
+
+    Returns:
+        GraphRenderer: A Bokeh graph renderer.
+
+    Refs:
+        * https://docs.bokeh.org/en/latest/docs/user_guide/topics/graph.html
+        * https://docs.bokeh.org/en/latest/docs/user_guide/basic/data.html
+    """
+
+    G_int = relabel_nodes_str2int(G)
+
+    # The GraphRenderer model maintains separate sub-GlyphRenderers for graph nodes and edges.
+    # This lets you customize nodes by modifying the `node_renderer` property of GraphRenderer.
+    # Likewise, you can cutomize the edges by modifying the `edge_renderer` property of GraphRenderer.
+    graph = GraphRenderer()
+
+    # In order to set the attributes of a node you will need to add it to the
+    # `graph.node_renderer.data_source.data`.  Then render the node color using the field name.
+    node_ids, node_colors = get_node_attrs(G)
+    edge_ids, edge_colors, edge_widths = get_edge_attrs(G)
+
+    # Set the index for all `ColumnDataSource`
+    graph.node_renderer.data_source.data["index"] = list(G_int.nodes())
+    graph.edge_renderer.data_source.data["index"] = list(G_int.edges())
+
+    # The ColumnDataSource of the edge sub-renderer must have a "start" and "end" column.
     start, end = [], []
-    for x, y in G.edges():
+    for x, y in G_int.edges():
         start.append(x)
         end.append(y)
 
-    # This renders the edges between nodes
-    graph_renderer.edge_renderer.data_source.data = dict(start=start, end=end)
+    # Add fields to `ColumnDataSource`
+    graph.node_renderer.data_source.data["node_id"] = node_ids
+    graph.node_renderer.data_source.data["node_color"] = node_colors
+    graph.edge_renderer.data_source.data["edge_id"] = edge_ids
+    graph.edge_renderer.data_source.data["edge_color"] = edge_colors
+    graph.edge_renderer.data_source.data["edge_width"] = edge_widths
+    graph.edge_renderer.data_source.data["start"] = start
+    graph.edge_renderer.data_source.data["end"] = end
 
-    # This renders the positions of the nodes
-    graph_renderer.layout_provider = StaticLayoutProvider(graph_layout=pos_dict)
-
-    graph_renderer.node_renderer.glyph = Circle(size=30, fill_color=Spectral4[0])
-    graph_renderer.node_renderer.selection_glyph = Circle(size=15, fill_color=Spectral4[2])
-    graph_renderer.node_renderer.hover_glyph = Circle(size=15, fill_color=Spectral4[1])
-
-    graph_renderer.edge_renderer.glyph = MultiLine(
-        line_color="#CCCCCC", line_alpha=0.8, line_width=5
+    # Generate glyphs
+    graph.node_renderer.glyph = Circle(size=25, fill_color="node_color")
+    graph.edge_renderer.glyph = MultiLine(
+        line_color="edge_color",
+        line_alpha=0.5,
+        line_width="edge_width",
     )
-    graph_renderer.edge_renderer.selection_glyph = MultiLine(line_color=Spectral4[2], line_width=5)
-    graph_renderer.edge_renderer.hover_glyph = MultiLine(line_color=Spectral4[1], line_width=5)
 
-    return graph_renderer
+    # Set the layout of the nodes according to their positions
+    pos_dict = hierarchy_pos(G_int, convertToNumber("root"))
+    graph.layout_provider = StaticLayoutProvider(graph_layout=pos_dict)
+
+    # Set rendering options for selection tools
+    graph.node_renderer.selection_glyph = Circle(size=15, fill_color=Spectral4[2])
+    graph.node_renderer.hover_glyph = Circle(size=15, fill_color=Spectral4[1])
+    graph.edge_renderer.selection_glyph = MultiLine(line_color=Spectral4[2], line_width=5)
+    graph.edge_renderer.hover_glyph = MultiLine(line_color=Spectral4[1], line_width=5)
+
+    return graph
+
+
+if __name__ == "__main__":
+    test_bokeh_rps()
