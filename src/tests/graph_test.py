@@ -101,7 +101,7 @@ def plot_NodesAndLinkedEdges(G: Graph, pos_dict: dict) -> Model:
 
     plot = Plot(sizing_mode="scale_both")
     plot.title.text = "Graph Interaction - Nodes & Linked Edge"
-    hover = HoverTool(tooltips=[("Name:", "@name")])
+    hover = HoverTool(tooltips=[("Node Id", "@node_id")])
     plot.add_tools(hover, TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
     plot.renderers.append(graph_renderer)
 
