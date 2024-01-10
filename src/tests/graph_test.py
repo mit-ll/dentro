@@ -140,7 +140,11 @@ def plot_NodesAndAdjacentNodes(G: Graph, pos_dict: dict, linked_plot: Model) -> 
 
     plot = Plot(sizing_mode="scale_both", x_range=linked_plot.x_range, y_range=linked_plot.y_range)
     plot.title.text = "Graph Interaction - Nodes & Adjacent Nodes"
-    plot.add_tools(HoverTool(), TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
+
+    hover = HoverTool(
+        tooltips=[("Node Id", "@node_id"), ("EV blue", "@ev_blue"), ("EV red", "@ev_red")]
+    )
+    plot.add_tools(hover, TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
     plot.renderers.append(graph_renderer)
 
     return plot
