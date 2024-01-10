@@ -101,7 +101,10 @@ def plot_NodesAndLinkedEdges(G: Graph, pos_dict: dict) -> Model:
 
     plot = Plot(sizing_mode="scale_both")
     plot.title.text = "Graph Interaction - Nodes & Linked Edge"
-    hover = HoverTool(tooltips=[("Node Id", "@node_id")])
+
+    hover = HoverTool(
+        tooltips=[("Node Id", "@node_id"), ("EV blue", "@ev_blue"), ("EV red", "@ev_red")]
+    )
     plot.add_tools(hover, TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
     plot.renderers.append(graph_renderer)
 
@@ -115,7 +118,16 @@ def plot_EdgesAndLinkedNodes(G: Graph, pos_dict: dict, linked_plot: Model) -> Mo
 
     plot = Plot(sizing_mode="scale_both", x_range=linked_plot.x_range, y_range=linked_plot.y_range)
     plot.title.text = "Graph Interaction - Edges & Linked Nodes"
-    plot.add_tools(HoverTool(), TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
+
+    hover = HoverTool(
+        tooltips=[
+            ("Edge Id", "@edge_id"),
+            ("Player", "@player"),
+            ("m", "@stat_m"),
+            ("n", "@stat_n"),
+        ]
+    )
+    plot.add_tools(hover, TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
     plot.renderers.append(graph_renderer)
 
     return plot
@@ -161,6 +173,68 @@ def bokeh_node_colors(G: nx.Graph) -> dict:
     return node_colors
 
 
+def networkx_datasync(G: Graph, graph: Model) -> Model:
+    """Bokeh uses `ColumnDataSource` as its primary data sourcing server.  In order for Networkx data to be useful to Bokeh, it needs to be merged into the format Bokeh expects.  This function is designed to copy the data entries in Networkx into Bokeh's `ColumnDataSource`.
+
+    Args:
+        G (Graph): Networkx graph.
+        graph (Model): Bokeh graph renderer.
+    """
+
+    G_int = relabel_nodes_str2int(G)
+
+    # In order to set the attributes of a node you will need to add it to the
+    # `graph.node_renderer.data_source.data`.  Then render the node color using the field name.
+    node_ids, node_colors = get_node_attrs(G)
+    edge_ids, edge_colors, edge_widths = get_edge_attrs(G)
+
+    # The `ColumnDataSource` of the edge sub-renderer must have a "start" and "end" column.
+    node_ev_blue, node_ev_red = [], []
+    edge_start, edge_end, edge_player, edge_m, edge_n, edge_label = [], [], [], [], [], []
+
+    for _, data in G.nodes(data=True):
+        # Get expected values
+        node_ev_blue.append(round(data["ev"]["blue"], 2))
+        node_ev_red.append(round(data["ev"]["red"], 2))
+
+    for x, y, data in G.edges(data=True):
+        edge_start.append(x)
+        edge_end.append(y)
+        edge_player.append(data["player"])
+        edge_m.append(data["s"]["m"])
+        edge_n.append(data["s"]["n"])
+        edge_label.append(data["s"]["label"])
+
+    # Set the index for all `ColumnDataSource`
+    graph.node_renderer.data_source.data["index"] = list(G_int.nodes())
+    graph.edge_renderer.data_source.data["index"] = list(G_int.edges())
+
+    # The ColumnDataSource of the edge sub-renderer must have a "start" and "end" column.
+    edge_start, edge_end = [], []
+    for x, y in G_int.edges():
+        edge_start.append(x)
+        edge_end.append(y)
+
+    # Add fields to `ColumnDataSource` for `node_renderer`
+    graph.node_renderer.data_source.data["node_id"] = node_ids
+    graph.node_renderer.data_source.data["node_color"] = node_colors
+    graph.node_renderer.data_source.data["ev_blue"] = node_ev_blue
+    graph.node_renderer.data_source.data["ev_red"] = node_ev_red
+
+    # Add fields to `ColumnDataSource` for `edge_renderer`
+    graph.edge_renderer.data_source.data["edge_id"] = edge_ids
+    graph.edge_renderer.data_source.data["edge_color"] = edge_colors
+    graph.edge_renderer.data_source.data["edge_width"] = edge_widths
+    graph.edge_renderer.data_source.data["start"] = edge_start
+    graph.edge_renderer.data_source.data["end"] = edge_end
+    graph.edge_renderer.data_source.data["player"] = edge_player
+    graph.edge_renderer.data_source.data["stat_m"] = edge_m
+    graph.edge_renderer.data_source.data["stat_n"] = edge_n
+    graph.edge_renderer.data_source.data["label"] = edge_label
+
+    return graph
+
+
 def bokeh_preprocess(G: Graph, pos_dict: dict) -> GraphRenderer:
     """The GraphRenderer model maintains separate sub-GlyphRenderers for graph nodes and edges.
     This lets you customize nodes by modifying the `node_renderer` property of GraphRenderer.
@@ -183,36 +257,11 @@ def bokeh_preprocess(G: Graph, pos_dict: dict) -> GraphRenderer:
         * https://docs.bokeh.org/en/latest/docs/user_guide/basic/data.html
     """
 
-    G_int = relabel_nodes_str2int(G)
-
     # The GraphRenderer model maintains separate sub-GlyphRenderers for graph nodes and edges.
     # This lets you customize nodes by modifying the `node_renderer` property of GraphRenderer.
     # Likewise, you can cutomize the edges by modifying the `edge_renderer` property of GraphRenderer.
     graph = GraphRenderer()
-
-    # In order to set the attributes of a node you will need to add it to the
-    # `graph.node_renderer.data_source.data`.  Then render the node color using the field name.
-    node_ids, node_colors = get_node_attrs(G)
-    edge_ids, edge_colors, edge_widths = get_edge_attrs(G)
-
-    # Set the index for all `ColumnDataSource`
-    graph.node_renderer.data_source.data["index"] = list(G_int.nodes())
-    graph.edge_renderer.data_source.data["index"] = list(G_int.edges())
-
-    # The ColumnDataSource of the edge sub-renderer must have a "start" and "end" column.
-    start, end = [], []
-    for x, y in G_int.edges():
-        start.append(x)
-        end.append(y)
-
-    # Add fields to `ColumnDataSource`
-    graph.node_renderer.data_source.data["node_id"] = node_ids
-    graph.node_renderer.data_source.data["node_color"] = node_colors
-    graph.edge_renderer.data_source.data["edge_id"] = edge_ids
-    graph.edge_renderer.data_source.data["edge_color"] = edge_colors
-    graph.edge_renderer.data_source.data["edge_width"] = edge_widths
-    graph.edge_renderer.data_source.data["start"] = start
-    graph.edge_renderer.data_source.data["end"] = end
+    networkx_datasync(G, graph)
 
     # Generate glyphs
     graph.node_renderer.glyph = Circle(size=25, fill_color="node_color")
@@ -223,6 +272,7 @@ def bokeh_preprocess(G: Graph, pos_dict: dict) -> GraphRenderer:
     )
 
     # Set the layout of the nodes according to their positions
+    G_int = relabel_nodes_str2int(G)
     pos_dict = hierarchy_pos(G_int, convertToNumber("root"))
     graph.layout_provider = StaticLayoutProvider(graph_layout=pos_dict)
 
