@@ -58,7 +58,8 @@ def plot_NodesAndLinkedEdges(
             ("Node Id", "@node_id"),
             ("EV blue", "@ev_blue"),
             ("EV red", "@ev_red"),
-        ]
+        ],
+        renderers=[graph],
     )
 
     # Configure plot
