@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://devguide.python.org/versions/">              <img alt="" src="https://img.shields.io/badge/python-^3.10-blue?logo=python&logoColor=white"></a>
+  <a href="https://devguide.python.org/versions/">              <img alt="" src="https://img.shields.io/badge/python-3.10|3.11-blue?logo=python&logoColor=white"></a>
   <a href="https://docs.github.com/en/actions/quickstart">      <img alt="" src="https://img.shields.io/badge/CI-github-blue?logo=github&logoColor=white"></a>
   <a href="https://black.readthedocs.io/en/stable/index.html">  <img alt="" src="https://img.shields.io/badge/code%20style-black-blue"></a>
 </p>
