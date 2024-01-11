@@ -7,7 +7,7 @@ import networkx as nx
 import numpy as np
 import ray
 
-from src.plot import create_plot
+from src.plot.matplotlib import create_plot
 from src.utils import rollout
 
 

@@ -1,7 +1,9 @@
 import networkx as nx
+import numpy as np
 from bokeh.model import Model
 from bokeh.models import BoxSelectTool
 from bokeh.models import Circle
+from bokeh.models import ColumnDataSource
 from bokeh.models import EdgesAndLinkedNodes
 from bokeh.models import GraphRenderer
 from bokeh.models import HoverTool
@@ -12,88 +14,38 @@ from bokeh.models import PanTool
 from bokeh.models import Plot
 from bokeh.models import ResetTool
 from bokeh.models import StaticLayoutProvider
-from bokeh.models import TabPanel
-from bokeh.models import Tabs
 from bokeh.models import TapTool
 from bokeh.models import Text
 from bokeh.models import WheelZoomTool
 from bokeh.palettes import Spectral4
-from bokeh.plotting import show
-from networkx import bfs_edges
-from rich.traceback import install
 
-from src.games import rock_paper_scissors
-from src.plot import get_edge_attrs
-from src.plot import get_node_attrs
-from src.plot import graph_tree
-from src.plot import hierarchy_pos
-from src.plot import show_plot
+from src.plot.utils import get_edge_attrs
+from src.plot.utils import get_node_attrs
+from src.plot.utils import hierarchy_pos
 from src.utils import convertFromNumber
 from src.utils import convertToNumber
 from src.utils import relabel_nodes_int2str
 from src.utils import relabel_nodes_str2int
 
-install(show_locals=True)
 
+def plot_NodesAndLinkedEdges(
+    G: nx.Graph,
+    pos_dict: dict,
+    linked_plot: Model | None = None,
+) -> Model:
+    """Renderer for highlighting nodes and adjacent nodes.
 
-def test_get_successors():
-    """Test function for getting successors."""
-    G = rock_paper_scissors()
+    Args:
+        G (nx.Graph): Networkx graph.
+        pos_dict (dict): Position of nodes.
+        linked_plot (Model | None, optional): Plots to link. Defaults to None.
 
-    # Get list of all successors
-    successors = list(bfs_edges(G, "B1", depth_limit=1))
+    Returns:
+        Model: Plot model.
 
-    # Verify that successors are correct
-    assert successors[0] == ("B1", "T1")
-    assert successors[1] == ("B1", "T2")
-    assert successors[2] == ("B1", "T3")
-
-
-def test_modify_edge():
-    """Test modifying edge data variables.  A basic check to ensure that data is saved to properly to edges."""
-    G = rock_paper_scissors()
-
-    # Modify the value of an edge
-    edge_data = G.get_edge_data("R1", "B1")
-    edge_data["weight"] = 100
-
-    # Check that the value was changed
-    assert G.get_edge_data("R1", "B1")["weight"] == 100
-
-
-def test_plot_rps():
-    """Test that graphing a network if functional.  Does not verify that the plot is correct, only that the plotting functions can be called without error."""
-    G = rock_paper_scissors()
-
-    edge_updates = G.edges()
-    graph_tree(G, x_size=14, y_size=9, target_edges=edge_updates)
-    show_plot()
-
-
-def test_bokeh_rps():
-    """Renders the RPS game using Bokeh instead of Matplotlib.  This provides a HTML experience with interactive features not availble in the standard Matplotlib library."""
-
-    # We need a RPS game where all nodes are integers
-    G = rock_paper_scissors()
-    pos_dict = hierarchy_pos(G, "root")
-
-    # TODO: Add aliasing into the networkx graph!
-
-    ## ------- Add interactive functions ------
-    plot1 = plot_NodesAndLinkedEdges(G, pos_dict)
-    plot2 = plot_EdgesAndLinkedNodes(G, pos_dict, plot1)
-    plot3 = plot_NodesAndAdjacentNodes(G, pos_dict, plot1)
-
-    # Create tabs and link them
-    tab1 = TabPanel(child=plot1, title="Nodes and Linked Edges")
-    tab2 = TabPanel(child=plot2, title="Edges and Linked Nodes")
-    tab3 = TabPanel(child=plot3, title="Nodes and Adjacent Nodes")
-
-    # Generate the plot
-    show(Tabs(tabs=[tab1, tab2, tab3], sizing_mode="scale_both"))
-
-
-def plot_NodesAndLinkedEdges(G: nx.Graph, pos_dict: dict) -> Model:
+    Refs:
+        * https://docs.bokeh.org/en/latest/docs/examples/topics/graph/interaction_nodeslinkededges.html
+    """
     graph = bokeh_preprocess(G, pos_dict)
 
     # Set linking
@@ -110,15 +62,44 @@ def plot_NodesAndLinkedEdges(G: nx.Graph, pos_dict: dict) -> Model:
     )
 
     # Configure plot
-    plot = Plot(sizing_mode="scale_both")
-    plot.title.text = "Graph Interaction - Nodes & Linked Edge"
+    if linked_plot is None:
+        plot = Plot(sizing_mode="scale_both")
+    else:
+        plot = Plot(
+            sizing_mode="scale_both",
+            x_range=linked_plot.x_range,
+            y_range=linked_plot.y_range,
+        )
+
+    # Setup tools
     plot.add_tools(hover, TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
     plot.renderers.append(graph)
 
+    # Add labels
+    plot.title.text = "Graph Interaction - Nodes & Linked Edge"
+    plot = add_node_labels(G, pos_dict, plot)
+    plot = add_edge_labels(G, pos_dict, plot)
     return plot
 
 
-def plot_EdgesAndLinkedNodes(G: nx.Graph, pos_dict: dict, linked_plot: Model) -> Model:
+def plot_EdgesAndLinkedNodes(
+    G: nx.Graph,
+    pos_dict: dict,
+    linked_plot: Model | None = None,
+) -> Model:
+    """Renderer for highlighting nodes and adjacent nodes.
+
+    Args:
+        G (nx.Graph): Networkx graph.
+        pos_dict (dict): Position of nodes.
+        linked_plot (Model | None, optional): Plots to link. Defaults to None.
+
+    Returns:
+        Model: Plot model.
+
+    Refs:
+        * https://docs.bokeh.org/en/3.3.2/docs/examples/topics/graph/interaction_edgeslinkednodes.html
+    """
     graph = bokeh_preprocess(G, pos_dict)
 
     # Set linking
@@ -136,7 +117,14 @@ def plot_EdgesAndLinkedNodes(G: nx.Graph, pos_dict: dict, linked_plot: Model) ->
     )
 
     # Configure plot
-    plot = Plot(sizing_mode="scale_both", x_range=linked_plot.x_range, y_range=linked_plot.y_range)
+    if linked_plot is None:
+        plot = Plot(sizing_mode="scale_both")
+    else:
+        plot = Plot(
+            sizing_mode="scale_both",
+            x_range=linked_plot.x_range,
+            y_range=linked_plot.y_range,
+        )
     plot.title.text = "Graph Interaction - Edges & Linked Nodes"
     plot.add_tools(hover, TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
     plot.renderers.append(graph)
@@ -144,7 +132,24 @@ def plot_EdgesAndLinkedNodes(G: nx.Graph, pos_dict: dict, linked_plot: Model) ->
     return plot
 
 
-def plot_NodesAndAdjacentNodes(G: nx.Graph, pos_dict: dict, linked_plot: Model) -> Model:
+def plot_NodesAndAdjacentNodes(
+    G: nx.Graph,
+    pos_dict: dict,
+    linked_plot: Model | None = None,
+) -> Model:
+    """Renderer for highlighting nodes and adjacent nodes.
+
+    Args:
+        G (nx.Graph): Networkx graph.
+        pos_dict (dict): Position of nodes.
+        linked_plot (Model | None, optional): Plots to link. Defaults to None.
+
+    Returns:
+        Model: Plot model.
+
+    Refs:
+        * https://docs.bokeh.org/en/latest/docs/examples/topics/graph/interaction_nodesadjacentnodes.html
+    """
     graph = bokeh_preprocess(G, pos_dict)
 
     # Set linking
@@ -161,7 +166,14 @@ def plot_NodesAndAdjacentNodes(G: nx.Graph, pos_dict: dict, linked_plot: Model) 
     )
 
     # Configure plot
-    plot = Plot(sizing_mode="scale_both", x_range=linked_plot.x_range, y_range=linked_plot.y_range)
+    if linked_plot is None:
+        plot = Plot(sizing_mode="scale_both")
+    else:
+        plot = Plot(
+            sizing_mode="scale_both",
+            x_range=linked_plot.x_range,
+            y_range=linked_plot.y_range,
+        )
     plot.title.text = "Graph Interaction - Nodes & Adjacent Nodes"
     plot.add_tools(hover, TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
     plot.renderers.append(graph)
@@ -213,7 +225,15 @@ def networkx_datasync(G: nx.Graph, graph: Model) -> Model:
 
     # The `ColumnDataSource` of the edge sub-renderer must have a "start" and "end" column.
     node_ev_blue, node_ev_red = [], []
-    edge_start, edge_end, edge_player, edge_m, edge_n, edge_label = [], [], [], [], [], []
+    edge_start, edge_end, edge_player, edge_m, edge_n, edge_label, edge_action = (
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    )
 
     for _, data in G.nodes(data=True):
         # Get expected values
@@ -227,6 +247,7 @@ def networkx_datasync(G: nx.Graph, graph: Model) -> Model:
         edge_m.append(data["s"]["m"])
         edge_n.append(data["s"]["n"])
         edge_label.append(data["s"]["label"])
+        edge_action.append(data.get("action", "none"))
 
     # Set the index for all `ColumnDataSource`
     graph.node_renderer.data_source.data["index"] = list(G_int.nodes())
@@ -254,8 +275,86 @@ def networkx_datasync(G: nx.Graph, graph: Model) -> Model:
     graph.edge_renderer.data_source.data["stat_m"] = edge_m
     graph.edge_renderer.data_source.data["stat_n"] = edge_n
     graph.edge_renderer.data_source.data["label"] = edge_label
+    graph.edge_renderer.data_source.data["action"] = edge_action
 
     return graph
+
+
+def add_node_labels(G: nx.Graph, pos: dict, plot: Model) -> Model:
+    """Displays the name of each node.
+
+    Args:
+        G (nx.Graph): Networkx graph.
+        pos (dict): Position of every node in `(x, y)` coordinates.
+        plot (Model): Plot model.
+
+    Refs:
+        * https://docs.bokeh.org/en/latest/docs/reference/models/glyphs/text.html
+    """
+
+    x = []
+    y = []
+    text = []
+
+    for node, data in G.nodes(data=True):
+        # Edge points in x, y
+        cx, cy = pos[node]
+
+        x.append(cx)
+        y.append(cy)
+        text.append(node)
+
+    # Create a `ColumnDataSource`
+    source = ColumnDataSource(dict(x=x, y=y, text=text))
+    glyph = Text(name="node_labels", x="x", y="y", text="text", angle=0, text_color="black")
+
+    plot.add_glyph(source, glyph)
+
+    return plot
+
+
+def add_edge_labels(G: nx.Graph, pos: dict, plot: Model) -> Model:
+    """Displays the `action` of each edge.  Helpful for understanding what each edge's decision/action means.
+
+    Args:
+        G (nx.Graph): Networkx graph.
+        pos (dict): Position of every node in `(x, y)` coordinates.
+        plot (Model): Plot model.
+
+    Refs:
+        * https://docs.bokeh.org/en/latest/docs/reference/models/glyphs/text.html
+    """
+
+    x = []
+    y = []
+    text = []
+    theta = []
+
+    for u, v, data in G.edges(data=True):
+        # Edge points in x, y
+        ux, uy = pos[u]  # x, y of parent node
+        vx, vy = pos[v]  # x, y of child node
+
+        # Edge coordinates for center
+        cx = (ux + vx) / 2  # center x position
+        cy = (uy + vy) / 2  # center y position
+        dx = max(ux, vx) - min(ux, vx)  # delta x
+        dy = max(uy, vy) - min(uy, vy)  # delta y
+        ctheta = np.arctan2(dx, dy) * 180 / np.pi  # angle of edge
+
+        if data.get("action", False):
+            x.append(cx)
+            y.append(cy)
+            theta.append(ctheta)
+            text.append(data["action"])
+
+    # Create a `ColumnDataSource`
+    source = ColumnDataSource(dict(x=x, y=y, text=text, theta=theta))
+    glyph = Text(x="x", y="y", text="text", angle=0, text_color="black")
+
+    plot.add_glyph(source, glyph)
+
+    return plot
 
 
 def bokeh_preprocess(G: nx.Graph, pos_dict: dict) -> Model:
@@ -299,7 +398,7 @@ def bokeh_preprocess(G: nx.Graph, pos_dict: dict) -> Model:
     graph.edge_renderer.hover_glyph = MultiLine(line_color=Spectral4[1], line_width=5)
 
     # Generate glyphs
-    graph.node_renderer.glyph = Circle(size=25, fill_color="node_color")
+    graph.node_renderer.glyph = Circle(size=25, fill_color="node_color", fill_alpha=0.5)
     graph.edge_renderer.glyph = MultiLine(
         line_color="edge_color",
         line_alpha=0.5,
@@ -307,7 +406,3 @@ def bokeh_preprocess(G: nx.Graph, pos_dict: dict) -> Model:
     )
 
     return graph
-
-
-if __name__ == "__main__":
-    test_bokeh_rps()

@@ -27,6 +27,10 @@
     ],
     "editor.wordWrap": "wordWrapColumn",
     "editor.wordWrapColumn": 100,
+    "[markdown]": {
+        "editor.wordWrap": "bounded",
+        "editor.wordWrapColumn": 100
+    },
     "___________________________Configs___________________________": "",
     "python.envFile": "${workspaceFolder}/.vscode/.env",
     "terminal.integrated.env.osx": {
