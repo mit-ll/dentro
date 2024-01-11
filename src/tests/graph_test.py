@@ -20,7 +20,6 @@ from bokeh.models import WheelZoomTool
 from bokeh.palettes import Spectral4
 from bokeh.plotting import show
 from networkx import bfs_edges
-from networkx import Graph
 from rich.traceback import install
 
 from src.games import rock_paper_scissors
@@ -85,7 +84,7 @@ def test_bokeh_rps():
     plot2 = plot_EdgesAndLinkedNodes(G, pos_dict, plot1)
     plot3 = plot_NodesAndAdjacentNodes(G, pos_dict, plot1)
 
-    # Create tabs
+    # Create tabs and link them
     tab1 = TabPanel(child=plot1, title="Nodes and Linked Edges")
     tab2 = TabPanel(child=plot2, title="Edges and Linked Nodes")
     tab3 = TabPanel(child=plot3, title="Nodes and Adjacent Nodes")
@@ -94,31 +93,39 @@ def test_bokeh_rps():
     show(Tabs(tabs=[tab1, tab2, tab3], sizing_mode="scale_both"))
 
 
-def plot_NodesAndLinkedEdges(G: Graph, pos_dict: dict) -> Model:
-    graph_renderer = bokeh_preprocess(G, pos_dict)
-    graph_renderer.selection_policy = NodesAndLinkedEdges()
-    graph_renderer.inspection_policy = NodesAndLinkedEdges()
+def plot_NodesAndLinkedEdges(G: nx.Graph, pos_dict: dict) -> Model:
+    graph = bokeh_preprocess(G, pos_dict)
 
+    # Set linking
+    graph.selection_policy = NodesAndLinkedEdges()
+    graph.inspection_policy = NodesAndLinkedEdges()
+
+    # Configure tools
+    hover = HoverTool(
+        tooltips=[
+            ("Node Id", "@node_id"),
+            ("EV blue", "@ev_blue"),
+            ("EV red", "@ev_red"),
+        ]
+    )
+
+    # Configure plot
     plot = Plot(sizing_mode="scale_both")
     plot.title.text = "Graph Interaction - Nodes & Linked Edge"
-
-    hover = HoverTool(
-        tooltips=[("Node Id", "@node_id"), ("EV blue", "@ev_blue"), ("EV red", "@ev_red")]
-    )
     plot.add_tools(hover, TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
-    plot.renderers.append(graph_renderer)
+    plot.renderers.append(graph)
 
     return plot
 
 
-def plot_EdgesAndLinkedNodes(G: Graph, pos_dict: dict, linked_plot: Model) -> Model:
-    graph_renderer = bokeh_preprocess(G, pos_dict)
-    graph_renderer.selection_policy = EdgesAndLinkedNodes()
-    graph_renderer.inspection_policy = EdgesAndLinkedNodes()
+def plot_EdgesAndLinkedNodes(G: nx.Graph, pos_dict: dict, linked_plot: Model) -> Model:
+    graph = bokeh_preprocess(G, pos_dict)
 
-    plot = Plot(sizing_mode="scale_both", x_range=linked_plot.x_range, y_range=linked_plot.y_range)
-    plot.title.text = "Graph Interaction - Edges & Linked Nodes"
+    # Set linking
+    graph.selection_policy = EdgesAndLinkedNodes()
+    graph.inspection_policy = EdgesAndLinkedNodes()
 
+    # Configure tools
     hover = HoverTool(
         tooltips=[
             ("Edge Id", "@edge_id"),
@@ -127,25 +134,37 @@ def plot_EdgesAndLinkedNodes(G: Graph, pos_dict: dict, linked_plot: Model) -> Mo
             ("n", "@stat_n"),
         ]
     )
+
+    # Configure plot
+    plot = Plot(sizing_mode="scale_both", x_range=linked_plot.x_range, y_range=linked_plot.y_range)
+    plot.title.text = "Graph Interaction - Edges & Linked Nodes"
     plot.add_tools(hover, TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
-    plot.renderers.append(graph_renderer)
+    plot.renderers.append(graph)
 
     return plot
 
 
-def plot_NodesAndAdjacentNodes(G: Graph, pos_dict: dict, linked_plot: Model) -> Model:
-    graph_renderer = bokeh_preprocess(G, pos_dict)
-    graph_renderer.selection_policy = NodesAndAdjacentNodes()
-    graph_renderer.inspection_policy = NodesAndAdjacentNodes()
+def plot_NodesAndAdjacentNodes(G: nx.Graph, pos_dict: dict, linked_plot: Model) -> Model:
+    graph = bokeh_preprocess(G, pos_dict)
 
+    # Set linking
+    graph.selection_policy = NodesAndAdjacentNodes()
+    graph.inspection_policy = NodesAndAdjacentNodes()
+
+    # Configure tools
+    hover = HoverTool(
+        tooltips=[
+            ("Node Id", "@node_id"),
+            ("EV blue", "@ev_blue"),
+            ("EV red", "@ev_red"),
+        ]
+    )
+
+    # Configure plot
     plot = Plot(sizing_mode="scale_both", x_range=linked_plot.x_range, y_range=linked_plot.y_range)
     plot.title.text = "Graph Interaction - Nodes & Adjacent Nodes"
-
-    hover = HoverTool(
-        tooltips=[("Node Id", "@node_id"), ("EV blue", "@ev_blue"), ("EV red", "@ev_red")]
-    )
     plot.add_tools(hover, TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
-    plot.renderers.append(graph_renderer)
+    plot.renderers.append(graph)
 
     return plot
 
@@ -177,7 +196,7 @@ def bokeh_node_colors(G: nx.Graph) -> dict:
     return node_colors
 
 
-def networkx_datasync(G: Graph, graph: Model) -> Model:
+def networkx_datasync(G: nx.Graph, graph: Model) -> Model:
     """Bokeh uses `ColumnDataSource` as its primary data sourcing server.  In order for Networkx data to be useful to Bokeh, it needs to be merged into the format Bokeh expects.  This function is designed to copy the data entries in Networkx into Bokeh's `ColumnDataSource`.
 
     Args:
@@ -239,7 +258,7 @@ def networkx_datasync(G: Graph, graph: Model) -> Model:
     return graph
 
 
-def bokeh_preprocess(G: Graph, pos_dict: dict) -> GraphRenderer:
+def bokeh_preprocess(G: nx.Graph, pos_dict: dict) -> Model:
     """The GraphRenderer model maintains separate sub-GlyphRenderers for graph nodes and edges.
     This lets you customize nodes by modifying the `node_renderer` property of GraphRenderer.
     Likewise, you can cutomize the edges by modifying the `edge_renderer` property of GraphRenderer.
@@ -267,6 +286,18 @@ def bokeh_preprocess(G: Graph, pos_dict: dict) -> GraphRenderer:
     graph = GraphRenderer()
     networkx_datasync(G, graph)
 
+    # Set the layout of the nodes according to their positions
+    pos_dict = hierarchy_pos(relabel_nodes_str2int(G), convertToNumber("root"))
+    graph.layout_provider = StaticLayoutProvider(graph_layout=pos_dict)
+
+    # Set selection glyphs
+    graph.node_renderer.selection_glyph = Circle(size=15, fill_color=Spectral4[2])
+    graph.edge_renderer.selection_glyph = MultiLine(line_color=Spectral4[2], line_width=5)
+
+    # Set hover glyphs
+    graph.node_renderer.hover_glyph = Circle(size=15, fill_color=Spectral4[1])
+    graph.edge_renderer.hover_glyph = MultiLine(line_color=Spectral4[1], line_width=5)
+
     # Generate glyphs
     graph.node_renderer.glyph = Circle(size=25, fill_color="node_color")
     graph.edge_renderer.glyph = MultiLine(
@@ -274,17 +305,6 @@ def bokeh_preprocess(G: Graph, pos_dict: dict) -> GraphRenderer:
         line_alpha=0.5,
         line_width="edge_width",
     )
-
-    # Set the layout of the nodes according to their positions
-    G_int = relabel_nodes_str2int(G)
-    pos_dict = hierarchy_pos(G_int, convertToNumber("root"))
-    graph.layout_provider = StaticLayoutProvider(graph_layout=pos_dict)
-
-    # Set rendering options for selection tools
-    graph.node_renderer.selection_glyph = Circle(size=15, fill_color=Spectral4[2])
-    graph.node_renderer.hover_glyph = Circle(size=15, fill_color=Spectral4[1])
-    graph.edge_renderer.selection_glyph = MultiLine(line_color=Spectral4[2], line_width=5)
-    graph.edge_renderer.hover_glyph = MultiLine(line_color=Spectral4[1], line_width=5)
 
     return graph
 
