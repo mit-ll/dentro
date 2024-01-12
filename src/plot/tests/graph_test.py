@@ -1,9 +1,11 @@
+import pathlib
+
+from bokeh.io import output_file
 from bokeh.models import TabPanel
 from bokeh.models import Tabs
 from bokeh.plotting import show
 from networkx import bfs_edges
 from rich.traceback import install
-from bokeh.io import output_file
 
 from src.games import rock_paper_scissors
 from src.plot.bokeh import plot_EdgesAndLinkedNodes
@@ -12,7 +14,6 @@ from src.plot.bokeh import plot_NodesAndLinkedEdges
 from src.plot.matplotlib import graph_tree
 from src.plot.matplotlib import show_plot
 from src.plot.utils import hierarchy_pos
-import pathlib
 
 install(show_locals=True)
 
