@@ -321,7 +321,7 @@ def graph_tree(
 
 
 @ray.remote
-def create_plot(
+def ray_graph_tree(
     G: nx.Graph,
     filepath: str,
     x_size: int,

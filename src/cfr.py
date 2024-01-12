@@ -7,8 +7,8 @@ import networkx as nx
 import numpy as np
 import ray
 
-from src.plot.bokeh import create_plot as bokeh_create_plot
-from src.plot.matplotlib import create_plot as matlab_create_plot
+from src.plot.bokeh import ray_graph_tree as bokeh_graph
+from src.plot.matplotlib import ray_graph_tree as matlab_graph
 from src.utils import rollout
 from src.utils import save_networkx_graph
 
@@ -317,12 +317,12 @@ def run_cfr(
 
             # Save off matplotlib and Bokeh graphs
             futures.append(  # matplotlib
-                matlab_create_plot.remote(
+                matlab_graph.remote(
                     G, plots_dir, fig_x_size, fig_y_size, layer_rollouts, step, iteration
                 )
             )
             futures.append(  # bokeh
-                bokeh_create_plot.remote(G, plots_dir, layer_rollouts, step, iteration)
+                bokeh_graph.remote(G, plots_dir, layer_rollouts, step, iteration)
             )
 
             # Update the label for each edge (this is for debugging purposes)

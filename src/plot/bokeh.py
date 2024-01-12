@@ -408,17 +408,16 @@ def networkx_datasync(G: nx.Graph, graph: Model) -> Model:
 
     # In order to set the attributes of a node you will need to add it to the
     # `graph.node_renderer.data_source.data`.  Then render the node color using the field name.
-    node_ids, node_colors = get_node_attrs(G)
-    edge_ids, edge_colors, edge_widths = get_edge_attrs(G)
+    node_id, node_color = get_node_attrs(G)
+    edge_id, edge_color, edge_width = get_edge_attrs(G)
 
-    # The `ColumnDataSource` of the edge sub-renderer must have a "start" and "end" column.
-    node_ev_blue, node_ev_red = [], []
-    start, end, player, m, n, label, action = ([] for _ in range(0, 7))
+    # Preallocate emptry lists
+    ev_blue, ev_red, start, end, player, m, n, label, action = ([] for _ in range(0, 9))
 
     for _, data in G.nodes(data=True):
         # Get expected values
-        node_ev_blue.append(round(data["ev"]["blue"], 2))
-        node_ev_red.append(round(data["ev"]["red"], 2))
+        ev_blue.append(round(data["ev"]["blue"], 2))
+        ev_red.append(round(data["ev"]["red"], 2))
 
     for x, y, data in G.edges(data=True):
         start.append(x)
@@ -440,15 +439,15 @@ def networkx_datasync(G: nx.Graph, graph: Model) -> Model:
         end.append(y)
 
     # Add fields to `ColumnDataSource` for `node_renderer`
-    graph.node_renderer.data_source.data["node_id"] = node_ids
-    graph.node_renderer.data_source.data["node_color"] = node_colors
-    graph.node_renderer.data_source.data["ev_blue"] = node_ev_blue
-    graph.node_renderer.data_source.data["ev_red"] = node_ev_red
+    graph.node_renderer.data_source.data["node_id"] = node_id
+    graph.node_renderer.data_source.data["node_color"] = node_color
+    graph.node_renderer.data_source.data["ev_blue"] = ev_blue
+    graph.node_renderer.data_source.data["ev_red"] = ev_red
 
     # Add fields to `ColumnDataSource` for `edge_renderer`
-    graph.edge_renderer.data_source.data["edge_id"] = edge_ids
-    graph.edge_renderer.data_source.data["edge_color"] = edge_colors
-    graph.edge_renderer.data_source.data["edge_width"] = edge_widths
+    graph.edge_renderer.data_source.data["edge_id"] = edge_id
+    graph.edge_renderer.data_source.data["edge_color"] = edge_color
+    graph.edge_renderer.data_source.data["edge_width"] = edge_width
     graph.edge_renderer.data_source.data["start"] = start
     graph.edge_renderer.data_source.data["end"] = end
     graph.edge_renderer.data_source.data["player"] = player
@@ -458,6 +457,23 @@ def networkx_datasync(G: nx.Graph, graph: Model) -> Model:
     graph.edge_renderer.data_source.data["action"] = action
 
     return graph
+
+
+def build_node_datasource(G: nx.Graph, pos: dict) -> ColumnDataSource:
+    x, y, text = ([] for _ in range(0, 3))
+
+    for node, data in G.nodes(data=True):
+        # Edge points in x, y
+        cx, cy = pos[node]
+
+        x.append(cx)
+        y.append(cy)
+        text.append(node)
+
+    # Create a `ColumnDataSource`
+    source = ColumnDataSource(dict(x=x, y=y, text=text))
+
+    return source  # type: ignore
 
 
 def add_node_labels(
@@ -477,20 +493,8 @@ def add_node_labels(
         * https://docs.bokeh.org/en/latest/docs/reference/models/glyphs/text.html
     """
 
-    x = []
-    y = []
-    text = []
+    source = build_node_datasource(G, pos)
 
-    for node, data in G.nodes(data=True):
-        # Edge points in x, y
-        cx, cy = pos[node]
-
-        x.append(cx)
-        y.append(cy)
-        text.append(node)
-
-    # Create a `ColumnDataSource`
-    source = ColumnDataSource(dict(x=x, y=y, text=text))
     glyph = Text(
         name="node_labels",
         x="x",
@@ -508,7 +512,7 @@ def add_node_labels(
     return plot
 
 
-def build_edge_datasource(G: nx.Graph, pos: dict) -> Model:
+def build_edge_datasource(G: nx.Graph, pos: dict) -> ColumnDataSource:
     """Create a `ColumnDataSource` for the edge properties.
 
     Args:
@@ -516,7 +520,7 @@ def build_edge_datasource(G: nx.Graph, pos: dict) -> Model:
         pos (dict): Position of all nodes.
 
     Returns:
-        Model: ColumnDataSource for edge properties.
+        ColumnDataSource: ColumnDataSource for edge properties.
     """
 
     eps = np.spacing(np.float32(1.0))
@@ -561,7 +565,7 @@ def build_edge_datasource(G: nx.Graph, pos: dict) -> Model:
         dict(x=x, y=y, text=text, label=label, theta=theta, color=color)
     )
 
-    return source
+    return source  # type: ignore
 
 
 def add_edge_labels(
@@ -722,7 +726,7 @@ def graph_tree(
 
 
 @ray.remote
-def create_plot(
+def ray_graph_tree(
     G: nx.Graph,
     save_path: str,
     layer_rollouts: list[tuple[str, str]],
