@@ -3,6 +3,7 @@ from bokeh.models import Tabs
 from bokeh.plotting import show
 from networkx import bfs_edges
 from rich.traceback import install
+from bokeh.io import output_file
 
 from src.games import rock_paper_scissors
 from src.plot.bokeh import plot_EdgesAndLinkedNodes
@@ -11,6 +12,7 @@ from src.plot.bokeh import plot_NodesAndLinkedEdges
 from src.plot.matplotlib import graph_tree
 from src.plot.matplotlib import show_plot
 from src.plot.utils import hierarchy_pos
+import pathlib
 
 install(show_locals=True)
 
@@ -58,17 +60,18 @@ def test_bokeh_rps():
 
     # TODO: Add aliasing into the networkx graph!
 
-    ## ------- Add interactive functions ------
-    plot1 = plot_NodesAndLinkedEdges(G, pos_dict)
-    plot2 = plot_EdgesAndLinkedNodes(G, pos_dict, plot1)
-    plot3 = plot_NodesAndAdjacentNodes(G, pos_dict, plot1)
+    tab_plot1 = plot_NodesAndLinkedEdges(G, pos_dict)
+    tab_plot2 = plot_EdgesAndLinkedNodes(G, pos_dict, tab_plot1)
+    tab_plot3 = plot_NodesAndAdjacentNodes(G, pos_dict, tab_plot1)
 
     # Create tabs and link them
-    tab1 = TabPanel(child=plot1, title="Nodes and Linked Edges")
-    tab2 = TabPanel(child=plot2, title="Edges and Linked Nodes")
-    tab3 = TabPanel(child=plot3, title="Nodes and Adjacent Nodes")
+    tab1 = TabPanel(child=tab_plot1, title="Nodes and Linked Edges")
+    tab2 = TabPanel(child=tab_plot2, title="Edges and Linked Nodes")
+    tab3 = TabPanel(child=tab_plot3, title="Nodes and Adjacent Nodes")
 
     # Generate the plot
+    pathlib.Path("save/tests").mkdir(parents=True, exist_ok=True)
+    output_file("save/tests/test_bokeh_rps_graph.html")
     show(Tabs(tabs=[tab1, tab2, tab3], sizing_mode="scale_both"))
 
 

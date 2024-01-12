@@ -28,17 +28,39 @@ from src.utils import relabel_nodes_int2str
 from src.utils import relabel_nodes_str2int
 
 
+def link_plots(pri_plot: Model, src_plot: Model | None = None) -> Model:
+    """Link an secondary plot to the axes of the primary plot.
+
+    Args:
+        pri_plot (Model): Primary plot.
+        src_plot (Model | None, optional): Source plot to derive axes from. Defaults to None.
+
+    Returns:
+        Model: _description_
+
+    Refs:
+        * https://docs.bokeh.org/en/latest/docs/user_guide/interaction/linking.html
+    """
+
+    if src_plot is None:
+        return pri_plot
+
+    pri_plot.x_range = src_plot.x_range
+    pri_plot.y_range = src_plot.y_range
+    pri_plot.sizing_mode = "scale_both"
+
+    return pri_plot
+
+
 def plot_NodesAndLinkedEdges(
     G: nx.Graph,
     pos_dict: dict,
-    linked_plot: Model | None = None,
 ) -> Model:
     """Renderer for highlighting nodes and adjacent nodes.
 
     Args:
         G (nx.Graph): Networkx graph.
         pos_dict (dict): Position of nodes.
-        linked_plot (Model | None, optional): Plots to link. Defaults to None.
 
     Returns:
         Model: Plot model.
@@ -46,7 +68,7 @@ def plot_NodesAndLinkedEdges(
     Refs:
         * https://docs.bokeh.org/en/latest/docs/examples/topics/graph/interaction_nodeslinkededges.html
     """
-    graph = bokeh_preprocess(G, pos_dict)
+    graph = preprocess(G, pos_dict)
 
     # Set linking
     graph.selection_policy = NodesAndLinkedEdges()
@@ -63,37 +85,35 @@ def plot_NodesAndLinkedEdges(
     )
 
     # Configure plot
-    if linked_plot is None:
-        plot = Plot(sizing_mode="scale_both")
-    else:
-        plot = Plot(
-            sizing_mode="scale_both",
-            x_range=linked_plot.x_range,
-            y_range=linked_plot.y_range,
-        )
-
-    # Setup tools
-    plot.add_tools(hover, TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
+    plot = Plot(sizing_mode="scale_both", title="Graph Interaction - Nodes & Linked Edge")
+    plot.add_tools(
+        hover,
+        TapTool(),
+        BoxSelectTool(),
+        PanTool(),
+        WheelZoomTool(),
+        ResetTool(),
+    )
     plot.renderers.append(graph)
 
     # Add labels
-    plot.title.text = "Graph Interaction - Nodes & Linked Edge"
     plot = add_node_labels(G, pos_dict, plot)
     plot = add_edge_labels(G, pos_dict, plot)
+
     return plot
 
 
 def plot_EdgesAndLinkedNodes(
     G: nx.Graph,
     pos_dict: dict,
-    linked_plot: Model | None = None,
+    source_plot: Model | None = None,
 ) -> Model:
     """Renderer for highlighting nodes and adjacent nodes.
 
     Args:
         G (nx.Graph): Networkx graph.
         pos_dict (dict): Position of nodes.
-        linked_plot (Model | None, optional): Plots to link. Defaults to None.
+        source_plot (Model | None, optional): Source plot to link to. Defaults to None.
 
     Returns:
         Model: Plot model.
@@ -101,7 +121,7 @@ def plot_EdgesAndLinkedNodes(
     Refs:
         * https://docs.bokeh.org/en/3.3.2/docs/examples/topics/graph/interaction_edgeslinkednodes.html
     """
-    graph = bokeh_preprocess(G, pos_dict)
+    graph = preprocess(G, pos_dict)
 
     # Set linking
     graph.selection_policy = EdgesAndLinkedNodes()
@@ -114,21 +134,26 @@ def plot_EdgesAndLinkedNodes(
             ("Player", "@player"),
             ("m", "@stat_m"),
             ("n", "@stat_n"),
-        ]
+        ],
+        renderers=[graph],
     )
 
     # Configure plot
-    if linked_plot is None:
-        plot = Plot(sizing_mode="scale_both")
-    else:
-        plot = Plot(
-            sizing_mode="scale_both",
-            x_range=linked_plot.x_range,
-            y_range=linked_plot.y_range,
-        )
-    plot.title.text = "Graph Interaction - Edges & Linked Nodes"
-    plot.add_tools(hover, TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
+    plot = Plot(sizing_mode="scale_both", title="Graph Interaction - Edges & Linked Nodes")
+    plot = link_plots(plot, source_plot)
+    plot.add_tools(
+        hover,
+        TapTool(),
+        BoxSelectTool(),
+        PanTool(),
+        WheelZoomTool(),
+        ResetTool(),
+    )
     plot.renderers.append(graph)
+
+    # Add labels
+    plot = add_node_labels(G, pos_dict, plot)
+    plot = add_edge_labels(G, pos_dict, plot)
 
     return plot
 
@@ -136,14 +161,14 @@ def plot_EdgesAndLinkedNodes(
 def plot_NodesAndAdjacentNodes(
     G: nx.Graph,
     pos_dict: dict,
-    linked_plot: Model | None = None,
+    source_plot: Model | None = None,
 ) -> Model:
     """Renderer for highlighting nodes and adjacent nodes.
 
     Args:
         G (nx.Graph): Networkx graph.
         pos_dict (dict): Position of nodes.
-        linked_plot (Model | None, optional): Plots to link. Defaults to None.
+        source_plot (Model | None, optional): Source plot to link to. Defaults to None.
 
     Returns:
         Model: Plot model.
@@ -151,7 +176,7 @@ def plot_NodesAndAdjacentNodes(
     Refs:
         * https://docs.bokeh.org/en/latest/docs/examples/topics/graph/interaction_nodesadjacentnodes.html
     """
-    graph = bokeh_preprocess(G, pos_dict)
+    graph = preprocess(G, pos_dict)
 
     # Set linking
     graph.selection_policy = NodesAndAdjacentNodes()
@@ -163,26 +188,31 @@ def plot_NodesAndAdjacentNodes(
             ("Node Id", "@node_id"),
             ("EV blue", "@ev_blue"),
             ("EV red", "@ev_red"),
-        ]
+        ],
+        renderers=[graph],
     )
 
     # Configure plot
-    if linked_plot is None:
-        plot = Plot(sizing_mode="scale_both")
-    else:
-        plot = Plot(
-            sizing_mode="scale_both",
-            x_range=linked_plot.x_range,
-            y_range=linked_plot.y_range,
-        )
-    plot.title.text = "Graph Interaction - Nodes & Adjacent Nodes"
-    plot.add_tools(hover, TapTool(), BoxSelectTool(), PanTool(), WheelZoomTool(), ResetTool())
+    plot = Plot(sizing_mode="scale_both", title="Graph Interaction - Nodes & Adjacent Nodes")
+    plot = link_plots(plot, source_plot)
+    plot.add_tools(
+        hover,
+        TapTool(),
+        BoxSelectTool(),
+        PanTool(),
+        WheelZoomTool(),
+        ResetTool(),
+    )
     plot.renderers.append(graph)
+
+    # Add labels
+    plot = add_node_labels(G, pos_dict, plot)
+    plot = add_edge_labels(G, pos_dict, plot)
 
     return plot
 
 
-def bokeh_node_colors(G: nx.Graph) -> dict:
+def get_node_colors(G: nx.Graph) -> dict:
     """Takes a Graph with integer named nodes and assigns colors based on their string representation.
 
     Args:
@@ -307,7 +337,16 @@ def add_node_labels(G: nx.Graph, pos: dict, plot: Model) -> Model:
 
     # Create a `ColumnDataSource`
     source = ColumnDataSource(dict(x=x, y=y, text=text))
-    glyph = Text(name="node_labels", x="x", y="y", text="text", angle=0, text_color="black")
+    glyph = Text(
+        name="node_labels",
+        x="x",
+        y="y",
+        text="text",
+        text_align="center",
+        text_baseline="middle",
+        angle=0,
+        text_color="black",
+    )
 
     plot.add_glyph(source, glyph)
 
@@ -351,14 +390,14 @@ def add_edge_labels(G: nx.Graph, pos: dict, plot: Model) -> Model:
 
     # Create a `ColumnDataSource`
     source = ColumnDataSource(dict(x=x, y=y, text=text, theta=theta))
-    glyph = Text(x="x", y="y", text="text", angle=0, text_color="black")
+    glyph = Text(x="x", y="y", text="text", text_align="center", angle=0, text_color="black")
 
     plot.add_glyph(source, glyph)
 
     return plot
 
 
-def bokeh_preprocess(G: nx.Graph, pos_dict: dict) -> Model:
+def preprocess(G: nx.Graph, pos_dict: dict) -> Model:
     """The GraphRenderer model maintains separate sub-GlyphRenderers for graph nodes and edges.
     This lets you customize nodes by modifying the `node_renderer` property of GraphRenderer.
     Likewise, you can cutomize the edges by modifying the `edge_renderer` property of GraphRenderer.
@@ -399,7 +438,7 @@ def bokeh_preprocess(G: nx.Graph, pos_dict: dict) -> Model:
     graph.edge_renderer.hover_glyph = MultiLine(line_color=Spectral4[1], line_width=5)
 
     # Generate glyphs
-    graph.node_renderer.glyph = Circle(size=25, fill_color="node_color", fill_alpha=0.5)
+    graph.node_renderer.glyph = Circle(size=35, fill_color="node_color", fill_alpha=0.5)
     graph.edge_renderer.glyph = MultiLine(
         line_color="edge_color",
         line_alpha=0.5,
