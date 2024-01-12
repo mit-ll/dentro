@@ -508,6 +508,62 @@ def add_node_labels(
     return plot
 
 
+def build_edge_datasource(G: nx.Graph, pos: dict) -> Model:
+    """Create a `ColumnDataSource` for the edge properties.
+
+    Args:
+        G (nx.Graph): Networkx graph.
+        pos (dict): Position of all nodes.
+
+    Returns:
+        Model: ColumnDataSource for edge properties.
+    """
+
+    eps = np.spacing(np.float32(1.0))
+    x, y, text, theta, label, color = ([] for _ in range(0, 6))
+
+    for u, v, data in G.edges(data=True):
+        # Edge points in x, y
+        ux, uy = pos[u]  # x, y of parent node
+        vx, vy = pos[v]  # x, y of child node
+
+        # Edge coordinates for center
+        cx = (ux + vx) / 2  # center x position
+        cy = (uy + vy) / 2  # center y position
+        dx = ux - vx  # delta x
+        dy = uy - vy  # delta y
+        ctheta = np.arctan2(dx, dy) * 180 / np.pi  # angle of edge
+        action_str = data.get("action", None)
+        prev_prob = data["s"]["label"]
+        m = data["s"]["m"]
+        n = data["s"]["n"]
+
+        # Add the probability of decision
+        old_decision_probability = data["s"]["label"]
+        new_decision_probability = round(data["s"]["m"] / (data["s"]["n"] + eps) * 100)
+
+        if new_decision_probability > old_decision_probability:
+            edge_color = "green"
+        elif new_decision_probability < old_decision_probability:
+            edge_color = "red"
+        else:
+            edge_color = "black"
+
+        x.append(cx)
+        y.append(cy)
+        text.append(action_str)
+        label.append(f"{round(m/n*100)}%")
+        theta.append(ctheta)
+        color.append(edge_color)
+
+    # Create a `ColumnDataSource`
+    source = ColumnDataSource(
+        dict(x=x, y=y, text=text, label=label, theta=theta, color=color)
+    )
+
+    return source
+
+
 def add_edge_labels(
     G: nx.Graph,
     pos: dict,
@@ -525,31 +581,8 @@ def add_edge_labels(
         * https://docs.bokeh.org/en/latest/docs/reference/models/glyphs/text.html
     """
 
-    x, y = [], []
-    text, theta, label = [], [], []
+    source = build_edge_datasource(G, pos)
 
-    for u, v, data in G.edges(data=True):
-        # Edge points in x, y
-        ux, uy = pos[u]  # x, y of parent node
-        vx, vy = pos[v]  # x, y of child node
-
-        # Edge coordinates for center
-        cx = (ux + vx) / 2  # center x position
-        cy = (uy + vy) / 2  # center y position
-        dx = ux - vx  # delta x
-        dy = uy - vy  # delta y
-        ctheta = np.arctan2(dx, dy) * 180 / np.pi  # angle of edge
-        action_str = data.get("action", None)
-        action_prob = data.get("s", None).get("label", None)
-
-        x.append(cx)
-        y.append(cy)
-        theta.append(ctheta)
-        text.append(action_str)
-        label.append(f"{action_prob}%")
-
-    # Create a `ColumnDataSource`
-    source = ColumnDataSource(dict(x=x, y=y, text=text, label=label, theta=theta))
     glyph_action = Text(
         x="x",
         y="y",
@@ -558,7 +591,7 @@ def add_edge_labels(
         text_baseline="top",
         text_font_size=text_font_size,
         angle=0,
-        text_color="black",
+        text_color="color",
     )
     glyph_prob = Text(
         x="x",
@@ -568,7 +601,7 @@ def add_edge_labels(
         text_baseline="bottom",
         text_font_size=text_font_size,
         angle=0,
-        text_color="black",
+        text_color="color",
     )
 
     plot.add_glyph(source, glyph_action)
