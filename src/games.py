@@ -39,7 +39,9 @@ def add_node_aliases(G: nx.Graph, nodes: list, alias_links: list):
             raise ValueError("Number of decision points do not match the alias links!")
 
         # Pair each edge with the alias link
-        for edge_path, alias_link, unique_pin in zip(edge_paths, alias_links, unique_pins):
+        for edge_path, alias_link, unique_pin in zip(
+            edge_paths, alias_links, unique_pins
+        ):
             alias_link["id"] = unique_pin
             alias_link["alias"] = True
             G.edges[edge_path]["s"] = alias_link
@@ -81,9 +83,15 @@ def rock_paper_scissors() -> nx.Graph:
     G.add_edge("root", "R1", type="random", player="arbiter", s={"m": 1, "n": 1})
 
     # Red makes moves first
-    G.add_edge("R1", "B1", type="decision", player="red", s={"m": 1, "n": 5}, action="rock")
-    G.add_edge("R1", "B2", type="decision", player="red", s={"m": 3, "n": 5}, action="paper")
-    G.add_edge("R1", "B3", type="decision", player="red", s={"m": 1, "n": 5}, action="scissors")
+    G.add_edge(
+        "R1", "B1", type="decision", player="red", s={"m": 1, "n": 5}, action="rock"
+    )
+    G.add_edge(
+        "R1", "B2", type="decision", player="red", s={"m": 3, "n": 5}, action="paper"
+    )
+    G.add_edge(
+        "R1", "B3", type="decision", player="red", s={"m": 1, "n": 5}, action="scissors"
+    )
 
     # Blue possible moves
     G.add_edge("B1", "T1", type="decision", player="blue", action="rock")

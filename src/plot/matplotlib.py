@@ -1,3 +1,5 @@
+import os
+import pathlib
 import random
 
 import matplotlib.pyplot as plt
@@ -26,7 +28,9 @@ def format_nodes(G: nx.Graph, pos: dict):
     _, node_colors = get_node_attrs(G)
 
     # Plot nodes
-    nx.draw_networkx_nodes(G, pos, node_size=500, node_color=node_colors, edgecolors="black")
+    nx.draw_networkx_nodes(
+        G, pos, node_size=500, node_color=node_colors, edgecolors="black"
+    )
     nx.draw_networkx_labels(G, pos, font_size=12, font_family="sans-serif")
 
 
@@ -52,7 +56,9 @@ def format_edges(G: nx.Graph, pos: dict):
     )
 
 
-def format_edge_labels(G: nx.Graph, pos: dict, target_edges: list[tuple[str, str]] | None = None):
+def format_edge_labels(
+    G: nx.Graph, pos: dict, target_edges: list[tuple[str, str]] | None = None
+):
     """Perform formatting of the edge labels for a specific set of edges.  This is done to draw special attention to a specific set of edges (i.e. when updating the probability distribution of a specific layer).
 
     Args:
@@ -89,7 +95,10 @@ def format_edge_labels(G: nx.Graph, pos: dict, target_edges: list[tuple[str, str
             edge_labelcolor[(u, v)] = "black"
 
         nx.draw_networkx_edge_labels(
-            G, pos, edge_labels={edge: edge_labels[edge]}, font_color=edge_labelcolor[edge]
+            G,
+            pos,
+            edge_labels={edge: edge_labels[edge]},
+            font_color=edge_labelcolor[edge],
         )
 
 
@@ -229,7 +238,15 @@ def add_custom_legend():
 
     # Create a legend
     legend_elements = [
-        Line2D([0], [0], color="gray", linewidth=2, alpha=0.5, linestyle="--", label="Aliasing"),
+        Line2D(
+            [0],
+            [0],
+            color="gray",
+            linewidth=2,
+            alpha=0.5,
+            linestyle="--",
+            label="Aliasing",
+        ),
         Line2D(
             [0],
             [0],
@@ -330,9 +347,18 @@ def create_plot(
     # Show graph as image
     graph_tree(G, x_size=x_size, y_size=y_size, target_edges=layer_rollouts)
     plt.title(
-        f"Iteration: {iteration} - Step: {step}!", fontname="Times New Roman Bold", weight="bold"
+        f"Iteration: {iteration} - Step: {step}!",
+        fontname="Times New Roman Bold",
+        weight="bold",
     )
-    plt.savefig(f"{filepath}/iter:{iteration}-step{step}", dpi=300)
+
+    # Create save path
+    save_path = f"{filepath}/matplotlib/iteration-{iteration}-step-{step}"
+    save_dir = os.path.dirname(save_path)
+    pathlib.Path(save_dir).mkdir(parents=True, exist_ok=True)
+
+    # Save to file
+    plt.savefig(save_path, dpi=300)
     plt.close()
 
     return True

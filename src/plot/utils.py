@@ -57,7 +57,9 @@ def get_edge_attrs(G: nx.Graph) -> tuple[list, list, list]:
         edge_links.append((u, v))
 
         # Set width of edge based on decision probability
-        edge_width = max((data["s"]["m"] / (data["s"]["n"] + eps) * 5) ** 1.5, MIN_EDGE_WIDTH)
+        edge_width = max(
+            (data["s"]["m"] / (data["s"]["n"] + eps) * 5) ** 1.5, MIN_EDGE_WIDTH
+        )
         edge_widths.append(edge_width)
 
         if data["player"] == "red":

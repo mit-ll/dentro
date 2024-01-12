@@ -27,7 +27,9 @@ def test_setting_expected_values():
 
     # Check the EV values are valid
     assert np.isclose(G.nodes["B1"]["ev"]["blue"], 1 / 3 * 100), "Invalid EV update"
-    assert np.isclose(G.nodes["R1"]["ev"]["red"], 1 / 3 * 1 / 5 * 100), "Invalid EV update"
+    assert np.isclose(
+        G.nodes["R1"]["ev"]["red"], 1 / 3 * 1 / 5 * 100
+    ), "Invalid EV update"
 
 
 def test_calc_regret_batch():
@@ -71,7 +73,7 @@ def test_calc_regret_batch():
             assert regrets[("B2", "T6")]["m"] == 1  # regret playing rock
 
 
-def test_rock_paper_scissors():
+def test_rock_paper_scissors_matplotlib():
     """Run the full Rock-Paper-Scissors experiment using CFRM.  This is integration testing exercising the entire pipeline.  The designer will have to verify whether the algorithm is performing as intended by manually inspecting the plots."""
 
     ray.init(ignore_reinit_error=True)

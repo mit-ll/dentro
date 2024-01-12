@@ -1,19 +1,10 @@
-import pathlib
-
-from bokeh.io import output_file
-from bokeh.models import TabPanel
-from bokeh.models import Tabs
-from bokeh.plotting import show
 from networkx import bfs_edges
 from rich.traceback import install
 
 from src.games import rock_paper_scissors
-from src.plot.bokeh import plot_EdgesAndLinkedNodes
-from src.plot.bokeh import plot_NodesAndAdjacentNodes
-from src.plot.bokeh import plot_NodesAndLinkedEdges
-from src.plot.matplotlib import graph_tree
+from src.plot.bokeh import graph_tree as bokeh_graph_tree
+from src.plot.matplotlib import graph_tree as matplotlib_graph_tree
 from src.plot.matplotlib import show_plot
-from src.plot.utils import hierarchy_pos
 
 install(show_locals=True)
 
@@ -37,44 +28,31 @@ def test_modify_edge():
 
     # Modify the value of an edge
     edge_data = G.get_edge_data("R1", "B1")
-    edge_data["weight"] = 100
+    edge_data["weight"] = 100  # type: ignore
 
     # Check that the value was changed
     assert G.get_edge_data("R1", "B1")["weight"] == 100
 
 
-def test_plot_rps():
-    """Test that graphing a network if functional.  Does not verify that the plot is correct, only that the plotting functions can be called without error."""
-    G = rock_paper_scissors()
+def test_matplotlib_rps():
+    """Test that graphing a network using `matplotlib`.  Does not verify that the plot is correct, only that the plotting functions can be called without error."""
 
+    G = rock_paper_scissors()
     edge_updates = G.edges()
-    graph_tree(G, x_size=14, y_size=9, target_edges=edge_updates)
+
+    matplotlib_graph_tree(G, x_size=14, y_size=9, target_edges=edge_updates)
     show_plot()
 
 
-def test_bokeh_rps():
-    """Renders the RPS game using Bokeh instead of Matplotlib.  This provides a HTML experience with interactive features not availble in the standard Matplotlib library."""
+def test_bokeh_rps(tmp_path):
+    """Renders the RPS game using Bokeh.  This provides a HTML experience with interactive features not availble in the standard Matplotlib library."""
 
-    # We need a RPS game where all nodes are integers
     G = rock_paper_scissors()
-    pos_dict = hierarchy_pos(G, "root")
+    edge_updates = G.edges()
 
-    # TODO: Add aliasing into the networkx graph!
-
-    tab_plot1 = plot_NodesAndLinkedEdges(G, pos_dict)
-    tab_plot2 = plot_EdgesAndLinkedNodes(G, pos_dict, tab_plot1)
-    tab_plot3 = plot_NodesAndAdjacentNodes(G, pos_dict, tab_plot1)
-
-    # Create tabs and link them
-    tab1 = TabPanel(child=tab_plot1, title="Nodes and Linked Edges")
-    tab2 = TabPanel(child=tab_plot2, title="Edges and Linked Nodes")
-    tab3 = TabPanel(child=tab_plot3, title="Nodes and Adjacent Nodes")
-
-    # Generate the plot
-    pathlib.Path("save/tests").mkdir(parents=True, exist_ok=True)
-    output_file("save/tests/test_bokeh_rps_graph.html")
-    show(Tabs(tabs=[tab1, tab2, tab3], sizing_mode="scale_both"))
-
-
-if __name__ == "__main__":
-    test_bokeh_rps()
+    bokeh_graph_tree(
+        G=G,
+        save_path=f"{str(tmp_path)}/bokeh_test.html",
+        target_edges=edge_updates,
+        html=True,
+    )
