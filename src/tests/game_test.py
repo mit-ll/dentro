@@ -73,7 +73,7 @@ def test_calc_regret_batch():
             assert regrets[("B2", "T6")]["m"] == 1  # regret playing rock
 
 
-def test_rock_paper_scissors_matplotlib():
+def test_rock_paper_scissors():
     """Run the full Rock-Paper-Scissors experiment using CFRM.  This is integration testing exercising the entire pipeline.  The designer will have to verify whether the algorithm is performing as intended by manually inspecting the plots."""
 
     ray.init(ignore_reinit_error=True)
@@ -85,7 +85,6 @@ def test_rock_paper_scissors_matplotlib():
         n_iterations=10,
         n_rollouts=1000,
         save_path="save/rock-paper-scissors",
-        graph_id="rps.networkx",
         fig_x_size=14,
         fig_y_size=9,
     )

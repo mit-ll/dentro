@@ -10,6 +10,7 @@ import ray
 from src.plot.bokeh import create_plot as bokeh_create_plot
 from src.plot.matplotlib import create_plot as matlab_create_plot
 from src.utils import rollout
+from src.utils import save_networkx_graph
 
 
 def get_expected_value(
@@ -270,7 +271,6 @@ def run_cfr(
     n_iterations: int = 1,
     n_rollouts: int = 100,
     save_path: str = "save/",
-    graph_id: str = "default.networkx",
     fig_x_size: int = 18,
     fig_y_size: int = 9,
 ):
@@ -291,7 +291,6 @@ def run_cfr(
         n_iterations (int, optional): Number of iterations to run the algorithm.  More difficult games will need higher iterations to converge. Defaults to 1.
         n_rollouts (int, optional): The number of rollouts to perform on each iteration.  Higher is better but uses more computing resources. Defaults to 100.
         save_path (str, optional): The path to save the files to. Defaults to "save/".
-        graph_id (str, optional): Name of folder to put graphs in. Defaults to "default.networkx".
         fig_x_size (int, optional): The figure size of the plots (x-dimension). Defaults to 18.
         fig_y_size (int, optional): The figure size of the plots (y-dimension). Defaults to 9.
     """
@@ -299,6 +298,7 @@ def run_cfr(
     futures: list = []
     plots_dir = f"{save_path}/plots"
 
+    # Iterate over tree
     for iteration in range(0, n_iterations):
         futures = [rollout.remote(G, "root") for _ in range(n_rollouts)]
         rollouts = ray.get(futures)
@@ -335,8 +335,5 @@ def run_cfr(
     # Wait for all tasks to complete
     ray.get(futures)
 
-    # Save off learned graph weights
-    graph_dir = f"{save_path}/graphs"
-    graph_path = f"{graph_dir}/{graph_id}"
-    Path(graph_dir).mkdir(parents=True, exist_ok=True)
-    nx.gml.write_gml(G, graph_path)
+    # Save off networkx graph
+    save_networkx_graph(G, save_path=f"{save_path}/graphs/rps.networkx")

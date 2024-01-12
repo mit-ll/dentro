@@ -1,4 +1,6 @@
 import math
+import os
+import pathlib
 
 import networkx as nx
 import numpy as np
@@ -79,6 +81,22 @@ def load_aliases(G: nx.Graph) -> dict[str, dict]:
                 data["s"] = link
 
     return alias_edges
+
+
+def save_networkx_graph(G: nx.Graph, save_path: str):
+    """Save off a Networkx graph to specified location.
+
+    Args:
+        G (nx.Graph): Networkx graph.
+        save_path (str): Path to save to.
+    """
+
+    # Set save path
+    save_dir = os.path.dirname(save_path)
+    pathlib.Path(save_dir).mkdir(parents=True, exist_ok=True)
+
+    # Save off learned graph weights
+    nx.gml.write_gml(G, save_path)
 
 
 def relabel_nodes_str2int(G: nx.Graph) -> nx.Graph:
