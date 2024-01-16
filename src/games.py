@@ -91,9 +91,20 @@ def init_edges(G: nx.Graph):
     """
     for edge in G.edges():
         if G.edges[edge]["s"].get("label") is None:
-            G.edges[edge]["s"]["label"] = round(
-                G.edges[edge]["s"]["m"] / G.edges[edge]["s"]["n"] * 100
-            )
+            m = G.edges[edge]["s"]["m"]
+            n = G.edges[edge]["s"]["n"]
+            G.edges[edge]["s"]["label"] = round(m / n * 100)
+
+
+def init_nodes(G: nx.Graph):
+    """Initialize all nodes to have consistent variables.
+
+    Args:
+        G (nx.Graph): Networkx graph.
+    """
+    for node in G.nodes():
+        if G.nodes[node].get("aliases") is None:
+            G.nodes[node]["aliases"] = []
 
 
 def rock_paper_scissors() -> nx.Graph:
@@ -154,6 +165,7 @@ def rock_paper_scissors() -> nx.Graph:
     # Initialize missing variables
     init_ev(G)
     init_edges(G)
+    init_nodes(G)
 
     return G
 

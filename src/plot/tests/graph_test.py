@@ -48,11 +48,9 @@ def test_bokeh_rps(tmp_path):
     """Renders the RPS game using Bokeh.  This provides a HTML experience with interactive features not availble in the standard Matplotlib library."""
 
     G = rock_paper_scissors()
-    edge_updates = G.edges()
 
     bokeh_graph_tree(
         G=G,
         save_path=f"{str(tmp_path)}/bokeh_test.html",
-        target_edges=edge_updates,
         html=True,
     )

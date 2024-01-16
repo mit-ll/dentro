@@ -56,17 +56,21 @@ def get_edge_attrs(G: nx.Graph) -> tuple[list, list, list]:
     for u, v, data in G.edges(data=True):
         edge_links.append((u, v))
 
-        # Set width of edge based on decision probability
-        edge_width = max(
-            (data["s"]["m"] / (data["s"]["n"] + eps) * 5) ** 1.5, MIN_EDGE_WIDTH
-        )
-        edge_widths.append(edge_width)
+        try:  # Set edge attributes based on data
+            m = data["s"]["m"]
+            n = data["s"]["n"] + eps
+            edge_width = max((m / n * 5) ** 2, MIN_EDGE_WIDTH)
+            edge_widths.append(edge_width)
 
-        if data["player"] == "red":
-            edge_colors.append("red")
-        elif data["player"] == "blue":
-            edge_colors.append("blue")
-        else:
+            if data["player"] == "red":
+                edge_colors.append("red")
+            elif data["player"] == "blue":
+                edge_colors.append("blue")
+            else:
+                edge_colors.append("grey")
+
+        except:  # Default values if no edge data available
+            edge_widths.append(MIN_EDGE_WIDTH)
             edge_colors.append("grey")
 
     return edge_links, edge_colors, edge_widths

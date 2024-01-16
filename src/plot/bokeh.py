@@ -1,5 +1,6 @@
 import os
 import pathlib
+from copy import deepcopy
 
 import networkx as nx
 import numpy as np
@@ -433,20 +434,24 @@ def networkx_datasync(G: nx.Graph, graph: Model) -> Model:
         ev_red.append(round(data["ev"]["red"], 2))
 
     for x, y, data in G.edges(data=True):
-        start.append(x)
-        end.append(y)
-        player.append(data["player"])
-        m.append(data["s"]["m"])
-        n.append(data["s"]["n"])
-        label.append(data["s"]["label"])
-        action.append(data.get("action", "none"))
+        try:  # Populate using data from Networkx graph
+            player.append(data["player"])
+            m.append(data["s"]["m"])
+            n.append(data["s"]["n"])
+            label.append(data["s"]["label"])
+            action.append(data.get("action", "none"))
+        except:  # Insert default values if no data available
+            player.append(None)
+            m.append(None)
+            n.append(None)
+            label.append(None)
+            action.append(None)
 
     # Set the index for all `ColumnDataSource`
     graph.node_renderer.data_source.data["index"] = list(G_int.nodes())
     graph.edge_renderer.data_source.data["index"] = list(G_int.edges())
 
     # The ColumnDataSource of the edge sub-renderer must have a "start" and "end" column.
-    start, end = [], []
     for x, y in G_int.edges():
         start.append(x)
         end.append(y)
@@ -648,27 +653,26 @@ def add_edge_labels(
     return plot
 
 
-# def add_aliasing(G: nx.Graph, pos: dict, plot: Model) -> Model:
-#     """Draws a dashed line between nodes that are aliased.  Aliasing means that there are two or more nodes and an agent cannot distinguish between them.  Hence, the agent must make a decision without knowledge of which node (or state) the agent is in.
+def add_aliasing_edges(G: nx.Graph) -> nx.Graph:
+    """Modified the original Networkx graph to add aliasing edges.  This is a post-processing step after the original Networkx graph has already been created.
 
-#     Args:
-#         G (nx.Graph): Networkx graph.
-#         pos (dict): Position of every node in `(x, y)` coordinates.
-#         plot (Model): The Bokeh plot model.
-#     """
-#     # key variables
-#     alias_set = set()
+    Args:
+        G (nx.Graph): Networkx graph.
+        pos (dict): Position of every node in `(x, y)` coordinates.
 
-#     # Configure node properties
-#     for u, _, d in G.edges(data=True):
-#         # Check whether an alias exists for the edge
-#         if d["s"].get("alias", False):
-#             # Get all aliased nodes and create an edge between them
-#             aliased_nodes = d["s"]["alias"]
-#             for alias_node in aliased_nodes:
-#                 G.add_edge(u, alias_node)
+    Returns:
+        nx.Graph: The modified Networkx graph with aliasing.
+    """
+    # key variables
+    G_copy = deepcopy(G)
 
-#     return plot
+    # Configure node properties
+    for node, data in G.nodes(data=True):
+        # Check whether an alias exists for the edge
+        for alias in data["aliases"]:
+            G_copy.add_edge(node, alias)
+
+    return G_copy
 
 
 def preprocess(
@@ -699,10 +703,13 @@ def preprocess(
 
     # The GraphRenderer model maintains separate sub-GlyphRenderers for graph nodes and edges.  This lets you customize nodes by modifying the `node_renderer` property of GraphRenderer.  Likewise, you can cutomize the edges by modifying the `edge_renderer` property of GraphRenderer.
     graph = GraphRenderer()
-    networkx_datasync(G, graph)
+    pos_dict = hierarchy_pos(relabel_nodes_str2int(G), convertToNumber("root"))
+    G_copy = add_aliasing_edges(G)
+
+    # Synchronize the networkx graph
+    networkx_datasync(G_copy, graph)
 
     # Set the layout of the nodes according to their positions
-    pos_dict = hierarchy_pos(relabel_nodes_str2int(G), convertToNumber("root"))
     graph.layout_provider = StaticLayoutProvider(graph_layout=pos_dict)
 
     # Set selection glyphs
@@ -735,7 +742,6 @@ def preprocess(
 def graph_tree(
     G: nx.Graph,
     save_path: str,
-    target_edges: list[tuple[str, str]] | None = None,
     html: bool = False,
 ):
     """Create a bokeh plot of the Networkx graph.  The plot will feature 5 HTML tabs that provide different highlighting options:
@@ -751,7 +757,7 @@ def graph_tree(
     Args:
         G (nx.Graph): Networkx graph.
         save_path (str): Save path of HTML.
-        target_edges (list[tuple[str, str]] | None) = Edges to update.  Defaults to None.
+        html (bool) = Whether to render HTML.  Defaults to False,
     """
 
     # We need a RPS game where all nodes are integers
@@ -814,6 +820,5 @@ def ray_graph_tree(
     graph_tree(
         G,
         save_path=f"{save_path}/bokeh/iterations-{iteration}-step-{step}.html",
-        target_edges=layer_rollouts,
         html=False,
     )
