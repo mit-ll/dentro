@@ -140,7 +140,7 @@ def test_rock_paper_scissors():
 
     check10 = 0.30 > (edge_R1_B1["s"]["m"] / edge_R1_B1["s"]["n"]) > 0.25
     check11 = 0.47 > (edge_R1_B2["s"]["m"] / edge_R1_B2["s"]["n"]) > 0.43
-    check12 = 0.30 > (edge_R1_B3["s"]["m"] / edge_R1_B2["s"]["n"]) > 0.25
+    check12 = 0.30 > (edge_R1_B3["s"]["m"] / edge_R1_B3["s"]["n"]) > 0.25
 
     assert (
         check1
