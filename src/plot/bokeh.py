@@ -40,17 +40,19 @@ from src.utils import relabel_nodes_str2int
 
 
 def link_plots(pri_plot: Model, src_plot: Model | None = None) -> Model:
-    """Link an secondary plot to the axes of the primary plot.
+    """Link an secondary plot to the axes of the primary plot.  This is needed when you want to sychronize multiple plots with the mouse wheel.
+
+    Refs
+    ```text
+    [1](https://docs.bokeh.org/en/latest/docs/user_guide/interaction/linking.html)
+    ```
 
     Args:
         pri_plot (Model): Primary plot.
         src_plot (Model | None, optional): Source plot to derive axes from. Defaults to None.
 
     Returns:
-        Model: _description_
-
-    Refs:
-        * https://docs.bokeh.org/en/latest/docs/user_guide/interaction/linking.html
+        Model: Plot model.
     """
 
     if src_plot is None:
@@ -99,6 +101,7 @@ def create_networkx_plot(
     # Add labels
     plot = add_node_labels(G, pos_dict, plot)
     plot = add_edge_labels(G, pos_dict, plot)
+    # plot = add_aliasing(G, pos_dict, plot)
 
     return plot
 
@@ -108,7 +111,12 @@ def render_nodes(
     pos_dict: dict,
     source_plot: Model | None = None,
 ) -> Model:
-    """Renderer for nodes.
+    """Highlight nodes when hovering over them.
+
+    Refs
+    ```
+    [1](https://docs.bokeh.org/en/latest/docs/examples/topics/graph/interaction_nodeslinkededges.html)
+    ```
 
     Args:
         G (nx.Graph): Networkx graph.
@@ -117,9 +125,6 @@ def render_nodes(
 
     Returns:
         Model: Plot model.
-
-    Refs:
-        * https://docs.bokeh.org/en/latest/docs/examples/topics/graph/interaction_nodeslinkededges.html
     """
     graph = preprocess(G, pos_dict)
 
@@ -155,7 +160,12 @@ def render_edges(
     pos_dict: dict,
     source_plot: Model | None = None,
 ) -> Model:
-    """Renderer for edges.
+    """Highlight edges when hovering over them.
+
+    Refs
+    ```
+    [1](https://docs.bokeh.org/en/latest/docs/examples/topics/graph/interaction_nodeslinkededges.html)
+    ```
 
     Args:
         G (nx.Graph): Networkx graph.
@@ -164,9 +174,6 @@ def render_edges(
 
     Returns:
         Model: Plot model.
-
-    Refs:
-        * https://docs.bokeh.org/en/latest/docs/examples/topics/graph/interaction_nodeslinkededges.html
     """
     graph = preprocess(G, pos_dict)
 
@@ -204,7 +211,12 @@ def render_nodes_and_edges(
     pos_dict: dict,
     source_plot: Model | None = None,
 ) -> Model:
-    """Renderer for highlighting nodes and adjacent nodes.
+    """Highlight nodes and edges.
+
+    Refs
+    ```
+    [1](https://docs.bokeh.org/en/latest/docs/examples/topics/graph/interaction_nodeslinkededges.html)
+    ```
 
     Args:
         G (nx.Graph): Networkx graph.
@@ -213,9 +225,6 @@ def render_nodes_and_edges(
 
     Returns:
         Model: Plot model.
-
-    Refs:
-        * https://docs.bokeh.org/en/latest/docs/examples/topics/graph/interaction_nodeslinkededges.html
     """
     graph = preprocess(G, pos_dict)
 
@@ -258,7 +267,12 @@ def render_edges_and_linknodes(
     pos_dict: dict,
     source_plot: Model | None = None,
 ) -> Model:
-    """Renderer for highlighting nodes and adjacent nodes.
+    """Highlight edges and their nodes attached to them.
+
+    Refs
+    ```
+    [1](https://docs.bokeh.org/en/3.3.2/docs/examples/topics/graph/interaction_edgeslinkednodes.html)
+    ```
 
     Args:
         G (nx.Graph): Networkx graph.
@@ -267,9 +281,6 @@ def render_edges_and_linknodes(
 
     Returns:
         Model: Plot model.
-
-    Refs:
-        * https://docs.bokeh.org/en/3.3.2/docs/examples/topics/graph/interaction_edgeslinkednodes.html
     """
     graph = preprocess(G, pos_dict)
 
@@ -315,7 +326,12 @@ def render_nodes_and_adjnodes(
     pos_dict: dict,
     source_plot: Model | None = None,
 ) -> Model:
-    """Renderer for highlighting nodes and adjacent nodes.
+    """Highlight nodes and adjacent nodes.
+
+    Refs
+    ```
+    [1](https://docs.bokeh.org/en/latest/docs/examples/topics/graph/interaction_nodesadjacentnodes.html)
+    ```
 
     Args:
         G (nx.Graph): Networkx graph.
@@ -324,9 +340,6 @@ def render_nodes_and_adjnodes(
 
     Returns:
         Model: Plot model.
-
-    Refs:
-        * https://docs.bokeh.org/en/latest/docs/examples/topics/graph/interaction_nodesadjacentnodes.html
     """
     graph = preprocess(G, pos_dict)
 
@@ -460,6 +473,15 @@ def networkx_datasync(G: nx.Graph, graph: Model) -> Model:
 
 
 def build_node_datasource(G: nx.Graph, pos: dict) -> ColumnDataSource:
+    """Build the node `ColumnDataSource` object and populate it with the data from Networkx graph.
+
+    Args:
+        G (nx.Graph): Networkx graph.
+        pos (dict): Position of all nodes.
+
+    Returns:
+        ColumnDataSource: Data source object.
+    """
     x, y, text = ([] for _ in range(0, 3))
 
     for node, data in G.nodes(data=True):
@@ -484,13 +506,19 @@ def add_node_labels(
 ) -> Model:
     """Displays the name of each node.
 
+    Refs
+    ```
+    [1](https://docs.bokeh.org/en/latest/docs/reference/models/glyphs/text.html)
+    ```
+
     Args:
         G (nx.Graph): Networkx graph.
         pos (dict): Position of every node in `(x, y)` coordinates.
         plot (Model): Plot model.
+        text_font_size (str): Size of font in pixel space.
 
-    Refs:
-        * https://docs.bokeh.org/en/latest/docs/reference/models/glyphs/text.html
+    Returns:
+        Model: Plot model.
     """
 
     source = build_node_datasource(G, pos)
@@ -576,13 +604,19 @@ def add_edge_labels(
 ) -> Model:
     """Displays the `action` of each edge.  Helpful for understanding what each edge's decision/action means.
 
+    Refs
+    ```
+    [1](https://docs.bokeh.org/en/latest/docs/reference/models/glyphs/text.html)
+    ```
+
     Args:
         G (nx.Graph): Networkx graph.
         pos (dict): Position of every node in `(x, y)` coordinates.
         plot (Model): Plot model.
+        text_font_size (str): Size of font in pixel space.
 
-    Refs:
-        * https://docs.bokeh.org/en/latest/docs/reference/models/glyphs/text.html
+    Returns:
+        Model: Plot model.
     """
 
     source = build_edge_datasource(G, pos)
@@ -614,6 +648,29 @@ def add_edge_labels(
     return plot
 
 
+# def add_aliasing(G: nx.Graph, pos: dict, plot: Model) -> Model:
+#     """Draws a dashed line between nodes that are aliased.  Aliasing means that there are two or more nodes and an agent cannot distinguish between them.  Hence, the agent must make a decision without knowledge of which node (or state) the agent is in.
+
+#     Args:
+#         G (nx.Graph): Networkx graph.
+#         pos (dict): Position of every node in `(x, y)` coordinates.
+#         plot (Model): The Bokeh plot model.
+#     """
+#     # key variables
+#     alias_set = set()
+
+#     # Configure node properties
+#     for u, _, d in G.edges(data=True):
+#         # Check whether an alias exists for the edge
+#         if d["s"].get("alias", False):
+#             # Get all aliased nodes and create an edge between them
+#             aliased_nodes = d["s"]["alias"]
+#             for alias_node in aliased_nodes:
+#                 G.add_edge(u, alias_node)
+
+#     return plot
+
+
 def preprocess(
     G: nx.Graph,
     pos_dict: dict,
@@ -624,6 +681,12 @@ def preprocess(
 
     In order to customize the nodes and edges you must modify the `ColumnDataSource` directly.  All plotting attributes are dervied from the `ColumnDataSource` which is a custom dictionary.  The renderers must source their values from `ColumnDataSource` when assigning attributes like color, width, etc.
 
+    Refs
+    ```
+    [1](https://docs.bokeh.org/en/latest/docs/user_guide/topics/graph.html)
+    [2](https://docs.bokeh.org/en/latest/docs/user_guide/basic/data.html)
+    ```
+
     Args:
         G (Graph): Networkx Graph.
         pos_dict (dict): Dictionary with position values for all nodes/edges.
@@ -632,10 +695,6 @@ def preprocess(
 
     Returns:
         GraphRenderer: A Bokeh graph renderer.
-
-    Refs:
-        * https://docs.bokeh.org/en/latest/docs/user_guide/topics/graph.html
-        * https://docs.bokeh.org/en/latest/docs/user_guide/basic/data.html
     """
 
     # The GraphRenderer model maintains separate sub-GlyphRenderers for graph nodes and edges.  This lets you customize nodes by modifying the `node_renderer` property of GraphRenderer.  Likewise, you can cutomize the edges by modifying the `edge_renderer` property of GraphRenderer.
