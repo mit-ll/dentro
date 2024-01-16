@@ -175,8 +175,8 @@ def add_aliasing(G: nx.Graph, pos: dict):
 
     # Configure node properties
     for u, v, d in G.edges(data=True):
-        if d["s"].get("alias", False):
-            if d["s"]["alias"]:
+        if d["s"].get("aliases", False):
+            if d["s"]["aliases"]:
                 alias_set.add(u)
 
     # Iterate over all aliased ndoes
