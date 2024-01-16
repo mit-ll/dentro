@@ -318,19 +318,23 @@ def run_cfr(
             # Save off matplotlib and Bokeh graphs
             futures.append(  # matplotlib
                 matlab_graph.remote(
-                    G, plots_dir, fig_x_size, fig_y_size, layer_rollouts, step, iteration
+                    G,
+                    plots_dir,
+                    fig_x_size,
+                    fig_y_size,
+                    layer_rollouts,
+                    step,
+                    iteration,
                 )
             )
-            futures.append(  # bokeh
-                bokeh_graph.remote(G, plots_dir, layer_rollouts, step, iteration)
-            )
+            futures.append(bokeh_graph.remote(G, plots_dir, step, iteration))  # bokeh
 
             # Update the label for each edge (this is for debugging purposes)
             for u, v, data in G.edges(data=True):
                 edge = (u, v)
-                G.edges[edge]["s"]["label"] = round(
-                    data["s"]["m"] / (data["s"]["n"]) * 100
-                )
+                m = data["s"]["m"]
+                n = data["s"]["n"]
+                G.edges[edge]["s"]["label"] = round(m / n * 100)
 
     # Wait for all tasks to complete
     ray.get(futures)

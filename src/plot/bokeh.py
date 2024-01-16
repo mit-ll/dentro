@@ -794,7 +794,6 @@ def graph_tree(
 def ray_graph_tree(
     G: nx.Graph,
     save_path: str,
-    layer_rollouts: list[tuple[str, str]],
     step: int,
     iteration: int,
 ):
@@ -811,7 +810,6 @@ def ray_graph_tree(
     Args:
         G (nx.Graph): Networkx graph.
         save_path (str): Save path of HTML.
-        layer_rollouts (list[tuple[str, str]]): Rollout decisions for a specific layer.  The downstream functions will make this into a set to eliminiate repeat edges.  Not ideal but sufficient for plotting purposes.
         step (int): The step (or layer) being updated for this particular plot.
         iteration (int): The current iteration of being updated.
         html (bool) = Flag to display HTML. Defaults to False.
