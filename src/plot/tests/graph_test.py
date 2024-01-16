@@ -1,7 +1,7 @@
 from networkx import bfs_edges
 from rich.traceback import install
 
-from src.games import rock_paper_scissors
+from src.game.rps import rock_paper_scissors
 from src.plot.bokeh import graph_tree as bokeh_graph_tree
 from src.plot.matplotlib import graph_tree as matplotlib_graph_tree
 from src.plot.matplotlib import show_plot

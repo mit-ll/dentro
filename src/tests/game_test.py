@@ -5,7 +5,7 @@ from rich.traceback import install
 from src.cfr import calc_regret_batch
 from src.cfr import run_cfr
 from src.cfr import update_node_evs
-from src.games import rock_paper_scissors
+from src.game.rps import rock_paper_scissors
 
 
 install(show_locals=True)

@@ -3,7 +3,7 @@ from pathlib import Path
 import networkx as nx
 from rich.traceback import install
 
-from src.games import rock_paper_scissors
+from src.game.rps import rock_paper_scissors
 from src.utils import load_aliases
 
 install(show_locals=True)
