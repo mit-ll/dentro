@@ -26,7 +26,21 @@ Dentro is an implementation of Counter Factual Regret Minimization (CFRM).  It p
 
 Nodes represent game states and edges represent possible decisions paths.  The agents greedily selects the decision paths that have the highest expected value.  However, the expected values changed based on the decision probabilities of itself as well as its opponent.  The probabilities and expected value will change over time as the agents learns how to optimize their play.
 
-
+```mermaid
+graph TD;
+  B1-->R1;
+  B2-->R1;
+  B3-->R1;
+  T1-->B1;
+  T2-->B1;
+  T3-->B1;
+  T4-->B2;
+  T5-->B2;
+  T6-->B2;
+  T7-->B3;
+  T8-->B3;
+  T9-->B3;
+```
 # 📦 Installation
 
 ```terminal

@@ -80,6 +80,7 @@ def pdoc(session: nox.Session):
         "--logo-link",
         "https://github.com/destin-v/dentro",
         "--math",
+        "--mermaid",
         "--footer-text",
         "Author: W. Li",
         "--output-directory",
