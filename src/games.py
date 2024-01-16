@@ -1,48 +1,75 @@
 import uuid
+from copy import deepcopy
 
 import networkx as nx
 
 
-def add_edge_aliases(G: nx.Graph, edges: list):
-    """Add edge aliasing information to each aliased edge.  This is only needed if the designer needs to attach a list of all edge aliases to every edge that is an alias.
+def add_node_aliasing(G: nx.Graph, aliased_nodes: list):
+    """Add node aliasing information.
 
     Args:
         G (nx.Graph): Networkx graph.
-        edges (list): A list of all edges that are aliased.
+        aliased_nodes (list): Nodes to be aliased.
     """
-    for edge in edges:
-        aliases = edges.copy()
-        aliases.remove(edge)
-        G.edges[edge]["aliases"] = aliases
+    # Assign alias links to the edge paths
+    for aliased_node in aliased_nodes:
+        # Update nodes with alias information
+        current_node_aliases = deepcopy(aliased_nodes)
+        current_node_aliases.remove(aliased_node)
+        G.nodes[aliased_node]["aliases"] = current_node_aliases
 
 
-def add_node_aliases(G: nx.Graph, nodes: list, alias_links: list):
+def add_edge_aliasing(G: nx.Graph, aliased_nodes: list, aliased_stats: list):
     """Used to ensure that edges of a list of nodes are properly aliased.  When two or more nodes are aliased it means that their edge probablity distributions must be equal.  An agent cannot distinguished between aliased nodes and therefore must have a common set of probability distributions across aliased nodes.
 
     Args:
         G (nx.Graph): Networkx graph.
-        nodes (list): A list of aliased nodes.
-        alias_links (list): These are the initial probabilities that are assigned to the aliased nodes.  It must be equal to the number of decision edges that are common across all aliased nodes.
+        aliased_nodes (list): A list of aliased nodes.
+        aliased_stats (list): These are the initial probabilities that are assigned to the aliased nodes.  It must be equal to the number of decision edges that are common across all aliased nodes.
 
     Raises:
-        ValueError: Throws an error when the number of decision edges do not match the number of `alias_links`.
+        ValueError: Throws an error when the number of decision edges do not match the number of `aliased_stats`.
     """
     # Assign alias links to the edge paths
-    for node in nodes:
+    for aliased_node in aliased_nodes:
         # Identify add edge paths from the parent node
-        edge_paths = list(nx.bfs_edges(G, node, depth_limit=1))
-        unique_pins = [str(uuid.uuid4()) for ii in range(0, len(edge_paths))]
+        aliased_edges = list(nx.bfs_edges(G, aliased_node, depth_limit=1))
+        aliased_edge_ids = [str(uuid.uuid4()) for ii in range(0, len(aliased_edges))]
 
         # The number of sucessors must equal the number of aliased links
-        check1 = len(edge_paths) == len(alias_links)
+        check1 = len(aliased_edges) == len(aliased_stats)
         if check1 is False:
             raise ValueError("Number of decision points do not match the alias links!")
 
         # Pair each edge with the alias link
-        for edge_path, alias_link, unique_pin in zip(edge_paths, alias_links, unique_pins):
-            alias_link["id"] = unique_pin
-            alias_link["alias"] = True
-            G.edges[edge_path]["s"] = alias_link
+        for aliased_edge, aliased_stat, aliased_edge_id in zip(
+            aliased_edges,
+            aliased_stats,
+            aliased_edge_ids,
+        ):
+            current_edge_aliases = deepcopy(aliased_edges)
+            current_edge_aliases.remove(aliased_edge)
+            str_edge_aliases = str(current_edge_aliases)  # must be string for GML
+
+            aliased_stat["id"] = aliased_edge_id
+            aliased_stat["aliases"] = str_edge_aliases
+            G.edges[aliased_edge]["s"] = aliased_stat
+
+
+def add_aliasing(G: nx.Graph, aliased_nodes: list, aliased_stats: list):
+    """Used to ensure that edges of a list of nodes are properly aliased.  When two or more nodes are aliased it means that their edge probablity distributions must be equal.  An agent cannot distinguished between aliased nodes and therefore must have a common set of probability distributions across aliased nodes.
+
+    Args:
+        G (nx.Graph): Networkx graph.
+        aliased_nodes (list): A list of aliased nodes.
+        aliased_stats (list): These are the initial probabilities that are assigned to the aliased nodes.  It must be equal to the number of decision edges that are common across all aliased nodes.
+
+    Raises:
+        ValueError: Throws an error when the number of decision edges do not match the number of `aliased_stats`.
+    """
+
+    add_node_aliasing(G, aliased_nodes)
+    add_edge_aliasing(G, aliased_nodes, aliased_stats)
 
 
 def init_ev(G: nx.Graph):
@@ -64,9 +91,20 @@ def init_edges(G: nx.Graph):
     """
     for edge in G.edges():
         if G.edges[edge]["s"].get("label") is None:
-            G.edges[edge]["s"]["label"] = round(
-                G.edges[edge]["s"]["m"] / G.edges[edge]["s"]["n"] * 100
-            )
+            m = G.edges[edge]["s"]["m"]
+            n = G.edges[edge]["s"]["n"]
+            G.edges[edge]["s"]["label"] = round(m / n * 100)
+
+
+def init_nodes(G: nx.Graph):
+    """Initialize all nodes to have consistent variables.
+
+    Args:
+        G (nx.Graph): Networkx graph.
+    """
+    for node in G.nodes():
+        if G.nodes[node].get("aliases") is None:
+            G.nodes[node]["aliases"] = []
 
 
 def rock_paper_scissors() -> nx.Graph:
@@ -81,9 +119,15 @@ def rock_paper_scissors() -> nx.Graph:
     G.add_edge("root", "R1", type="random", player="arbiter", s={"m": 1, "n": 1})
 
     # Red makes moves first
-    G.add_edge("R1", "B1", type="decision", player="red", s={"m": 1, "n": 5}, action="rock")
-    G.add_edge("R1", "B2", type="decision", player="red", s={"m": 3, "n": 5}, action="paper")
-    G.add_edge("R1", "B3", type="decision", player="red", s={"m": 1, "n": 5}, action="scissors")
+    G.add_edge(
+        "R1", "B1", type="decision", player="red", s={"m": 1, "n": 5}, action="rock"
+    )
+    G.add_edge(
+        "R1", "B2", type="decision", player="red", s={"m": 3, "n": 5}, action="paper"
+    )
+    G.add_edge(
+        "R1", "B3", type="decision", player="red", s={"m": 1, "n": 5}, action="scissors"
+    )
 
     # Blue possible moves
     G.add_edge("B1", "T1", type="decision", player="blue", action="rock")
@@ -112,70 +156,19 @@ def rock_paper_scissors() -> nx.Graph:
     G.add_node("T9", ev={"blue": 0, "red": 0}, type="terminal")
 
     # Aliased nodes
-    add_node_aliases(
+    add_aliasing(
         G,
-        nodes=["B1", "B2", "B3"],
-        alias_links=[{"m": 1, "n": 3}, {"m": 1, "n": 3}, {"m": 1, "n": 3}],
+        aliased_nodes=["B1", "B2", "B3"],
+        aliased_stats=[{"m": 1, "n": 3}, {"m": 1, "n": 3}, {"m": 1, "n": 3}],
     )
 
     # Initialize missing variables
     init_ev(G)
     init_edges(G)
+    init_nodes(G)
 
     return G
 
 
-def rock_paper_scissors_int() -> nx.Graph:
-    """An example of Rock-Paper-Scissors game where Red's decisions are aliased from the perspective of Blue.  This is a zero-sum game where neither player starts off using the Nash Equilibrium strategy.
-
-    Returns:
-        nx.Graph: Networkx graph.
-    """
-    G = nx.DiGraph()
-
-    # Root starting point
-    G.add_edge(1000, 2001, type="random", player="arbiter", s={"m": 1, "n": 1})
-
-    # Red makes moves first
-    G.add_edge(2001, 3001, type="decision", player="red", s={"m": 1, "n": 5}, action="rock")
-    G.add_edge(2001, 3002, type="decision", player="red", s={"m": 3, "n": 5}, action="paper")
-    G.add_edge(2001, 3003, type="decision", player="red", s={"m": 1, "n": 5}, action="scissors")
-
-    # Blue possible moves
-    G.add_edge(3001, 9001, type="decision", player="blue", action="rock")
-    G.add_edge(3001, 9002, type="decision", player="blue", action="paper")
-    G.add_edge(3001, 9003, type="decision", player="blue", action="scissors")
-
-    G.add_edge(3002, 9004, type="decision", player="blue", action="rock")
-    G.add_edge(3002, 9005, type="decision", player="blue", action="paper")
-    G.add_edge(3002, 9006, type="decision", player="blue", action="scissors")
-
-    G.add_edge(3003, 9007, type="decision", player="blue", action="rock")
-    G.add_edge(3003, 9008, type="decision", player="blue", action="paper")
-    G.add_edge(3003, 9009, type="decision", player="blue", action="scissors")
-
-    # Set terminal values
-    G.add_node(9001, ev={"blue": 0, "red": 0}, type="terminal")
-    G.add_node(9002, ev={"blue": 1, "red": -1}, type="terminal")
-    G.add_node(9003, ev={"blue": -1, "red": 1}, type="terminal")
-
-    G.add_node(9004, ev={"blue": -1, "red": 1}, type="terminal")
-    G.add_node(9005, ev={"blue": 0, "red": 0}, type="terminal")
-    G.add_node(9006, ev={"blue": 1, "red": -1}, type="terminal")
-
-    G.add_node(9007, ev={"blue": 1, "red": -1}, type="terminal")
-    G.add_node(9008, ev={"blue": -1, "red": 1}, type="terminal")
-    G.add_node(9009, ev={"blue": 0, "red": 0}, type="terminal")
-
-    # Aliased nodes
-    add_node_aliases(
-        G,
-        nodes=[3001, 3002, 3003],
-        alias_links=[{"m": 1, "n": 3}, {"m": 1, "n": 3}, {"m": 1, "n": 3}],
-    )
-
-    # Initialize missing variables
-    init_ev(G)
-    init_edges(G)
-
-    return G
+if __name__ == "__main__":
+    rock_paper_scissors()

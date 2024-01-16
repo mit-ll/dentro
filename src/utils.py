@@ -1,6 +1,11 @@
+import math
+import os
+import pathlib
+
 import networkx as nx
 import numpy as np
 import ray
+from networkx import relabel_nodes
 
 
 @ray.remote
@@ -62,17 +67,95 @@ def load_aliases(G: nx.Graph) -> dict[str, dict]:
 
     # Retrieve the aliases edges
     for u, v, data in G.edges(data=True):
-        if data["s"].get("alias", False):
+        if data["s"].get("aliases", False):
             uuid = data["s"]["id"]
             alias_edges[uuid] = data["s"]
 
     # Assign alias edges back into the graph tree
-    for uuid, link in alias_edges.items():
+    for uuid, stats in alias_edges.items():
         for u, v, data in G.edges(data=True):
             # Link the data only if a matching uuid is found
-            check1 = data["s"].get("alias", False)
+            check1 = data["s"].get("aliases", False)
             check2 = data["s"].get("id", 0) == uuid
             if check1 and check2:
-                data["s"] = link
+                data["s"] = stats
 
     return alias_edges
+
+
+def save_networkx_graph(G: nx.Graph, save_path: str):
+    """Save off a Networkx graph to specified location.
+
+    Args:
+        G (nx.Graph): Networkx graph.
+        save_path (str): Path to save to.
+    """
+
+    # Set save path
+    save_dir = os.path.dirname(save_path)
+    pathlib.Path(save_dir).mkdir(parents=True, exist_ok=True)
+
+    # Save off learned graph weights
+    nx.gml.write_gml(G, save_path)
+
+
+def relabel_nodes_str2int(G: nx.Graph) -> nx.Graph:
+    """Convert Graph names from `str` to `int`.
+
+    Returns:
+        nx.Graph: All nodes as assigned integers as names.
+    """
+
+    # We need to remap all string values to integer equivalents
+    mapping = {}
+    for node in G.nodes():
+        name_int = convertToNumber(node)
+        name_str = node
+        mapping[name_str] = name_int
+
+    G = relabel_nodes(G, mapping, copy=True)
+
+    return G
+
+
+def relabel_nodes_int2str(G: nx.Graph) -> nx.Graph:
+    """Convert Graph names from `int` to `str`.
+
+    Returns:
+        nx.Graph: All nodes as assigned string names.
+    """
+
+    # We need to remap all string values to integer equivalents
+    mapping = {}
+    for node in G.nodes():
+        name_int = node
+        name_str = convertFromNumber(name_int)
+        mapping[name_int] = name_str
+
+    G_str = relabel_nodes(G, mapping, copy=True)
+
+    return G_str
+
+
+def convertToNumber(s: str) -> int:
+    """Method for converting a string into a unique number.  The process converts string `bytes` into `int`.
+
+    Args:
+        s (str): A string.
+
+    Returns:
+        int: An integer
+    """
+    return int.from_bytes(s.encode(), "little")
+
+
+def convertFromNumber(n: int) -> str:
+    """Converts a integer to a string.
+
+    Args:
+        n (int): An integer.
+
+    Returns:
+        str: The matching string representation.
+    """
+    return n.to_bytes(math.ceil(n.bit_length() / 8), "little").decode()

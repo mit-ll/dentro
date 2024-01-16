@@ -1,3 +1,5 @@
+import os
+import pathlib
 import random
 
 import matplotlib.pyplot as plt
@@ -8,8 +10,9 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 
-# Constants
-MIN_EDGE_WIDTH = 0.2
+from src.plot.utils import get_edge_attrs
+from src.plot.utils import get_node_attrs
+from src.plot.utils import hierarchy_pos
 
 
 def format_nodes(G: nx.Graph, pos: dict):
@@ -21,20 +24,13 @@ def format_nodes(G: nx.Graph, pos: dict):
         G (nx.Graph): Networkx graph.
         pos (dict): Position of every node in `(x, y)` coordinates.
     """
-    # Configure node properties
-    node_colors = []
-    for name, _ in G.nodes(data=True):
-        if name[0] == "R":
-            node_colors.append("mistyrose")
-        elif name[0] == "T":
-            node_colors.append("lightgrey")
-        elif name[0] == "B":
-            node_colors.append("lightcyan")
-        else:
-            node_colors.append("navajowhite")
+
+    _, node_colors = get_node_attrs(G)
 
     # Plot nodes
-    nx.draw_networkx_nodes(G, pos, node_size=500, node_color=node_colors, edgecolors="black")
+    nx.draw_networkx_nodes(
+        G, pos, node_size=500, node_color=node_colors, edgecolors="black"
+    )
     nx.draw_networkx_labels(G, pos, font_size=12, font_family="sans-serif")
 
 
@@ -46,24 +42,7 @@ def format_edges(G: nx.Graph, pos: dict):
         pos (dict): Position of every node in `(x, y)` coordinates.
     """
     # Configure edge properties
-    eps = np.spacing(np.float32(1.0))
-    edge_links = []
-    edge_colors = []
-    edge_widths = []
-
-    for u, v, data in G.edges(data=True):
-        edge_links.append((u, v))
-
-        # Set width of edge based on decision probability
-        edge_width = max((data["s"]["m"] / (data["s"]["n"] + eps) * 5) ** 1.5, MIN_EDGE_WIDTH)
-        edge_widths.append(edge_width)
-
-        if data["player"] == "red":
-            edge_colors.append("red")
-        elif data["player"] == "blue":
-            edge_colors.append("blue")
-        else:
-            edge_colors.append("orange")
+    edge_links, edge_colors, edge_widths = get_edge_attrs(G)
 
     # Plot edges
     nx.draw_networkx_edges(
@@ -77,7 +56,9 @@ def format_edges(G: nx.Graph, pos: dict):
     )
 
 
-def format_edge_labels(G: nx.Graph, pos: dict, target_edges: list[tuple[str, str]] | None = None):
+def format_edge_labels(
+    G: nx.Graph, pos: dict, target_edges: list[tuple[str, str]] | None = None
+):
     """Perform formatting of the edge labels for a specific set of edges.  This is done to draw special attention to a specific set of edges (i.e. when updating the probability distribution of a specific layer).
 
     Args:
@@ -114,7 +95,10 @@ def format_edge_labels(G: nx.Graph, pos: dict, target_edges: list[tuple[str, str
             edge_labelcolor[(u, v)] = "black"
 
         nx.draw_networkx_edge_labels(
-            G, pos, edge_labels={edge: edge_labels[edge]}, font_color=edge_labelcolor[edge]
+            G,
+            pos,
+            edge_labels={edge: edge_labels[edge]},
+            font_color=edge_labelcolor[edge],
         )
 
 
@@ -191,8 +175,8 @@ def add_aliasing(G: nx.Graph, pos: dict):
 
     # Configure node properties
     for u, v, d in G.edges(data=True):
-        if d["s"].get("alias", False):
-            if d["s"]["alias"]:
+        if d["s"].get("aliases", False):
+            if d["s"]["aliases"]:
                 alias_set.add(u)
 
     # Iterate over all aliased ndoes
@@ -254,7 +238,15 @@ def add_custom_legend():
 
     # Create a legend
     legend_elements = [
-        Line2D([0], [0], color="gray", linewidth=2, alpha=0.5, linestyle="--", label="Aliasing"),
+        Line2D(
+            [0],
+            [0],
+            color="gray",
+            linewidth=2,
+            alpha=0.5,
+            linestyle="--",
+            label="Aliasing",
+        ),
         Line2D(
             [0],
             [0],
@@ -328,88 +320,8 @@ def graph_tree(
     return fig, ax
 
 
-def hierarchy_pos(
-    G,
-    root=None,
-    width=1.0,
-    vert_gap=0.2,
-    vert_loc=0,
-    xcenter=0.5,
-) -> dict[str, tuple]:
-    """
-    From Joel's answer at https://stackoverflow.com/a/29597209/2966723.
-    Licensed under Creative Commons Attribution-Share Alike
-
-    If the graph is a tree this will return the positions to plot this in a
-    hierarchical layout.
-
-    Args:
-        G: the graph (must be a tree)
-            root: the root node of current branch
-            - if the tree is directed and this is not given,
-            the root will be found and used
-            - if the tree is directed and this is given, then
-            the positions will be just for the descendants of this node.
-            - if the tree is undirected and not given,
-            then a random choice will be used.
-
-        width: horizontal space allocated for this branch - avoids overlap with other branches
-        vert_gap: gap between levels of hierarchy
-        vert_loc: vertical location of root
-        xcenter: horizontal location of root
-
-    """
-    if not nx.is_tree(G):
-        raise TypeError("cannot use hierarchy_pos on a graph that is not a tree")
-
-    if root is None:
-        if isinstance(G, nx.DiGraph):
-            root = next(
-                iter(nx.topological_sort(G))
-            )  # allows back compatibility with nx version 1.11
-        else:
-            root = random.choice(list(G.nodes))
-
-    def _hierarchy_pos(
-        G, root, width=1.0, vert_gap=0.2, vert_loc=0, xcenter=0.5, pos=None, parent=None
-    ):
-        """
-        see hierarchy_pos docstring for most arguments
-
-        pos: a dict saying where all nodes go if they have been assigned
-        parent: parent of this branch. - only affects it if non-directed
-
-        """
-
-        if pos is None:
-            pos = {root: (xcenter, vert_loc)}
-        else:
-            pos[root] = (xcenter, vert_loc)
-        children = list(G.neighbors(root))
-        if not isinstance(G, nx.DiGraph) and parent is not None:
-            children.remove(parent)
-        if len(children) != 0:
-            dx = width / len(children)
-            nextx = xcenter - width / 2 - dx / 2
-            for child in children:
-                nextx += dx
-                pos = _hierarchy_pos(
-                    G,
-                    child,
-                    width=dx,
-                    vert_gap=vert_gap,
-                    vert_loc=vert_loc - vert_gap,
-                    xcenter=nextx,
-                    pos=pos,
-                    parent=root,
-                )
-        return pos
-
-    return _hierarchy_pos(G, root, width, vert_gap, vert_loc, xcenter)
-
-
 @ray.remote
-def create_plot(
+def ray_graph_tree(
     G: nx.Graph,
     filepath: str,
     x_size: int,
@@ -435,9 +347,18 @@ def create_plot(
     # Show graph as image
     graph_tree(G, x_size=x_size, y_size=y_size, target_edges=layer_rollouts)
     plt.title(
-        f"Iteration: {iteration} - Step: {step}!", fontname="Times New Roman Bold", weight="bold"
+        f"Iteration: {iteration} - Step: {step}!",
+        fontname="Times New Roman Bold",
+        weight="bold",
     )
-    plt.savefig(f"{filepath}/iter:{iteration}-step{step}", dpi=300)
+
+    # Create save path
+    save_path = f"{filepath}/matplotlib/iteration-{iteration}-step-{step}"
+    save_dir = os.path.dirname(save_path)
+    pathlib.Path(save_dir).mkdir(parents=True, exist_ok=True)
+
+    # Save to file
+    plt.savefig(save_path, dpi=300)
     plt.close()
 
     return True

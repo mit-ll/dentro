@@ -7,7 +7,7 @@ log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(linen
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 
 [tool.black]
-line-length = 100
+line-length = 90
 target-version = ['py39']
 include = '\.pyi?$'
 exclude = '''

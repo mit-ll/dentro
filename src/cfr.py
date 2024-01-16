@@ -7,11 +7,15 @@ import networkx as nx
 import numpy as np
 import ray
 
-from src.plot import create_plot
+from src.plot.bokeh import ray_graph_tree as bokeh_graph
+from src.plot.matplotlib import ray_graph_tree as matlab_graph
 from src.utils import rollout
+from src.utils import save_networkx_graph
 
 
-def get_expected_value(G: nx.Graph, target_node: str, id: Literal["red", "blue"]) -> float:
+def get_expected_value(
+    G: nx.Graph, target_node: str, id: Literal["red", "blue"]
+) -> float:
     """This function multiplies the probability distribution edges of one parent node to the expected values of its children nodes.  The output is the expected value for the specified target node.  This is a helper function for `src.cfr.update_node_evs`.
 
     .. note::
@@ -147,7 +151,9 @@ def calc_regret_batch(G: nx.Graph, layer_rollouts: list) -> dict:
     layer_regrets: dict = {}
 
     # Process the regrets in parallel
-    futures = [calc_regret_single.remote(G, layer_rollout) for layer_rollout in layer_rollouts]
+    futures = [
+        calc_regret_single.remote(G, layer_rollout) for layer_rollout in layer_rollouts
+    ]
     layer_regrets = ray.get(futures)
 
     # Create a dictionary that holds all regret values based on possible edges
@@ -265,7 +271,6 @@ def run_cfr(
     n_iterations: int = 1,
     n_rollouts: int = 100,
     save_path: str = "save/",
-    graph_id: str = "default.networkx",
     fig_x_size: int = 18,
     fig_y_size: int = 9,
 ):
@@ -286,21 +291,14 @@ def run_cfr(
         n_iterations (int, optional): Number of iterations to run the algorithm.  More difficult games will need higher iterations to converge. Defaults to 1.
         n_rollouts (int, optional): The number of rollouts to perform on each iteration.  Higher is better but uses more computing resources. Defaults to 100.
         save_path (str, optional): The path to save the files to. Defaults to "save/".
-        graph_id (str, optional): Name of folder to put graphs in. Defaults to "default.networkx".
         fig_x_size (int, optional): The figure size of the plots (x-dimension). Defaults to 18.
         fig_y_size (int, optional): The figure size of the plots (y-dimension). Defaults to 9.
     """
     # Initialize variables
     futures: list = []
-
-    # Initialize paths
-    graph_dir = f"{save_path}/graphs"
-    graph_path = f"{graph_dir}/{graph_id}"
     plots_dir = f"{save_path}/plots"
 
-    Path(graph_dir).mkdir(parents=True, exist_ok=True)
-    Path(plots_dir).mkdir(parents=True, exist_ok=True)
-
+    # Iterate over tree
     for iteration in range(0, n_iterations):
         futures = [rollout.remote(G, "root") for _ in range(n_rollouts)]
         rollouts = ray.get(futures)
@@ -317,20 +315,25 @@ def run_cfr(
             update_edge_probs(G, layer_regrets)
             update_node_evs(G, players)
 
-            # Show graph as image
-            futures.append(
-                create_plot.remote(
+            # Save off matplotlib and Bokeh graphs
+            futures.append(  # matplotlib
+                matlab_graph.remote(
                     G, plots_dir, fig_x_size, fig_y_size, layer_rollouts, step, iteration
                 )
+            )
+            futures.append(  # bokeh
+                bokeh_graph.remote(G, plots_dir, layer_rollouts, step, iteration)
             )
 
             # Update the label for each edge (this is for debugging purposes)
             for u, v, data in G.edges(data=True):
                 edge = (u, v)
-                G.edges[edge]["s"]["label"] = round(data["s"]["m"] / (data["s"]["n"]) * 100)
+                G.edges[edge]["s"]["label"] = round(
+                    data["s"]["m"] / (data["s"]["n"]) * 100
+                )
 
     # Wait for all tasks to complete
     ray.get(futures)
 
-    # Save off learned graph weights
-    nx.gml.write_gml(G, graph_path)
+    # Save off networkx graph
+    save_networkx_graph(G, save_path=f"{save_path}/graphs/rps.networkx")

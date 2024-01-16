@@ -27,7 +27,9 @@ def test_setting_expected_values():
 
     # Check the EV values are valid
     assert np.isclose(G.nodes["B1"]["ev"]["blue"], 1 / 3 * 100), "Invalid EV update"
-    assert np.isclose(G.nodes["R1"]["ev"]["red"], 1 / 3 * 1 / 5 * 100), "Invalid EV update"
+    assert np.isclose(
+        G.nodes["R1"]["ev"]["red"], 1 / 3 * 1 / 5 * 100
+    ), "Invalid EV update"
 
 
 def test_calc_regret_batch():
@@ -83,7 +85,6 @@ def test_rock_paper_scissors():
         n_iterations=10,
         n_rollouts=1000,
         save_path="save/rock-paper-scissors",
-        graph_id="rps.networkx",
         fig_x_size=14,
         fig_y_size=9,
     )

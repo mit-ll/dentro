@@ -23,10 +23,14 @@
     "workbench.editor.showTabs": "single",
     "___________________________Rulers___________________________": "",
     "editor.rulers": [
-        100
+        90
     ],
-    // "editor.wordWrap": "wordWrapColumn",
-    "editor.wordWrapColumn": 100,
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrapColumn": 90,
+    "[markdown]": {
+        "editor.wordWrap": "bounded",
+        "editor.wordWrapColumn": 90
+    },
     "___________________________Configs___________________________": "",
     "python.envFile": "${workspaceFolder}/.vscode/.env",
     "terminal.integrated.env.osx": {
