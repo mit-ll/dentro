@@ -45,7 +45,6 @@ jobs:
       with:
         token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
         python-version: ${{ matrix.python-version }}
-        token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
     # Install poetry and disable virtual environments.
     - name: Install Poetry
       uses: snok/install-poetry@v1
