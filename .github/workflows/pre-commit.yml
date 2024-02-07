@@ -20,6 +20,18 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
+    - name: Check Rate Limits
+      run: |
+        curl \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token $TOKEN" \
+          https://api.github.com/rate_limit
+      env:
+        TOKEN: ${{ secrets.GH_GITHUB_COM_TOKEN }}
+    - name: Checkout Repo
     - uses: actions/checkout@v4
+    - name: Set up Python 3.10
     - uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
     - uses: pre-commit/action@v3.0.0
