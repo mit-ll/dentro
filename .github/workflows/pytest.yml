@@ -30,11 +30,20 @@ jobs:
         python-version: ["3.10", "3.11"]
     # Checkout the repo
     steps:
+    - name: "rate limit"
+      run: |
+        curl \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token $TOKEN" \
+          https://api.github.com/rate_limit
+      env:
+        TOKEN: ${{ secrets.GH_GITHUB_COM_TOKEN }}
     - uses: actions/checkout@v4
     # Setup the python environments to use.
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
+        token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
         python-version: ${{ matrix.python-version }}
         token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
     # Install poetry and disable virtual environments.
