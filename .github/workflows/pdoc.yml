@@ -74,9 +74,6 @@ jobs:
           export PYTHONPATH=${{ github.workspace }}
           nox -r -s pdoc
       # Upload the artifact to the next job
-      - name: FIX
-        run: |
-            export NODE_TLS_REJECT_UNAUTHORIZED=0
       - name: Upload pdoc artifact
         uses: actions/upload-artifact@v3
         with:
