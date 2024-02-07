@@ -28,9 +28,9 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11"]
-    # Checkout the repo
+    # Check rate limits
     steps:
-    - name: "rate limit"
+    - name: Check Rate Limits
       run: |
         curl \
           -H "Accept: application/vnd.github.v3+json" \
@@ -38,7 +38,9 @@ jobs:
           https://api.github.com/rate_limit
       env:
         TOKEN: ${{ secrets.GH_GITHUB_COM_TOKEN }}
-    - uses: actions/checkout@v4
+    # Checkout the repo
+    - name: Checkout Repo
+      uses: actions/checkout@v4
     # Setup the python environments to use.
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
