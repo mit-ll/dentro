@@ -12,12 +12,8 @@
 name: pdocs
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -25,14 +21,18 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.  However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
+##########################################################################################
+# Jobs
+##########################################################################################
 jobs:
-  # In the build job we create the static HTML files we want to publish.
+  ########################################################################################
+  # Build the static HTML files we want to publish.
+  ########################################################################################
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -65,7 +65,9 @@ jobs:
           export PYTHONPATH=${{ github.workspace }}
           nox -r -s pdoc
 
-  # In the deploy job we publish the static HTML files to Github Pages.
+  ########################################################################################
+  # Deploy the static HTML files to Github Pages.
+  ########################################################################################
   deploy:
     needs: [build]
     environment:

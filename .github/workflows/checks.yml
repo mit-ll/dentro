@@ -5,8 +5,10 @@
 #       CREATED:  2/8/2024
 #
 # References:
-#
+# * https://github.com/actions/setup-python/pull/443#issuecomment-1206776401
+# * https://github.com/settings/tokens
 ##########################################################################################
+
 name: checks
 
 on:
@@ -14,11 +16,17 @@ on:
   push:
     branches: [main]
 
+##########################################################################################
+# Jobs
+##########################################################################################
 jobs:
+  ########################################################################################
+  # Check the rate limits of the public Github server.
+  ########################################################################################
   check-rate-limits:
     runs-on: ubuntu-latest
     steps:
-    - name: Check Rate Limits
+    - name: Show Rate Limits
       run: |
         curl \
           -H "Accept: application/vnd.github.v3+json" \
