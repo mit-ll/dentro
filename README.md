@@ -70,7 +70,7 @@ Dentro is built on Ray meaning you can easily scale processing using parallel re
 ## Plots
 Dentro comes with prebuilt plotting functions that will generate graphs for each training iteration.  This is helpful when you want to track how the agents adjust their probabilities after an update.  The plotting packages are built using Matplotlib making modifications easy to implement.
 
-# ★ Examples
+# 💡 Examples
 Rock-Paper-Scissors shows how to model an adversarial game with partially observable states and stochastic decision making.
 
 The game design of Rock-Paper-Scissors can be found in `src/games.py`.  An example of how to run CFRM with Rock-Paper-Scissors can be found in `tests/game_test.py::test_rock_paper_scissors`
