@@ -1,0 +1,76 @@
+##########################################################################################
+#   DESCRIPTION:  Testing.
+#        AUTHOR:  W. Li
+#       VERSION:  1.0
+#       CREATED:  2/8/2024
+#
+# References:
+# * https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-pythonCommon
+#
+##########################################################################################
+
+name: pdocs
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+env:
+  NODE_OPTIONS: --use-openssl-ca
+  
+jobs:
+  # In the build job we create the static HTML files we want to publish.
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      # Checkout the source repo
+      - name: Checkout source
+        uses: actions/checkout@v4
+      # Setup the environment with specified python version
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          token: ${{ secrets.GH_GITHUB_COM_TOKEN }}
+          python-version: "3.10"
+      # Install poetry and disable virtual environments
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: false
+          virtualenvs-in-project: false
+          installer-parallel: true
+      # Install nox
+      - name: Install dependencies
+        run: |
+          pip install nox
+      # Use nox to generate the document
+      - name: Generate pdoc artifact
+        run: |
+          mkdir -p save/pdocs
+          export PYTHONPATH=${{ github.workspace }}
+          nox -r -s pdoc
+      # Upload the artifact to the next job
+      - name: Upload pdoc artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: pdoc artifact
+          path: save
+        
