@@ -9,7 +9,7 @@
 #
 ##########################################################################################
 
-name: pdocs
+name: test_runner
 
 on:
   # Runs on pushes targeting the default branch
