@@ -42,6 +42,10 @@ jobs:
     strategy:
       fail-fast: false
     steps:
+      - name: Show env
+        run: |
+          echo $NODE_OPTIONS
+          echo $NODE_EXTRA_CA_CERTS
       # Checkout the source repo
       - name: Checkout source
         uses: actions/checkout@v4
