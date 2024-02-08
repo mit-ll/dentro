@@ -20,15 +20,6 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-    # Check rate limits
-    - name: Check Rate Limits
-      run: |
-        curl \
-          -H "Accept: application/vnd.github.v3+json" \
-          -H "Authorization: token $TOKEN" \
-          https://api.github.com/rate_limit
-      env:
-        TOKEN: ${{ secrets.GH_GITHUB_COM_TOKEN }}
     # Checkout repo
     - name: Checkout Repo
       uses: actions/checkout@v4

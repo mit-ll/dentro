@@ -38,15 +38,6 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      # Check rate limits
-      - name: Check Rate Limits
-        run: |
-          curl \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token $TOKEN" \
-            https://api.github.com/rate_limit
-        env:
-          TOKEN: ${{ secrets.GH_GITHUB_COM_TOKEN }}
       # Checkout the source repo
       - name: Checkout source
         uses: actions/checkout@v4

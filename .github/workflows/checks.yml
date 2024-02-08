@@ -1,0 +1,28 @@
+##########################################################################################
+#   DESCRIPTION:  Perform runner checks.
+#        AUTHOR:  W. Li
+#       VERSION:  1.0
+#       CREATED:  2/8/2024
+#
+# References:
+#
+##########################################################################################
+name: checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check-rate-limits:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check Rate Limits
+      run: |
+        curl \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token $TOKEN" \
+          https://api.github.com/rate_limit
+      env:
+        TOKEN: ${{ secrets.GH_GITHUB_COM_TOKEN }}
