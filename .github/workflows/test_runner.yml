@@ -33,6 +33,7 @@ concurrency:
 
 env:
   NODE_OPTIONS: --use-openssl-ca
+  NODE_EXTRA_CA_CERTS: /etc/ssl/certs/ca-certificates.crt
 
 jobs:
   # In the build job we create the static HTML files we want to publish.
