@@ -26,6 +26,10 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+# Set shared directory variable
+env:
+  SHARE_DIR: $(openssl rand -base64 12)
+
 ##########################################################################################
 # Jobs
 ##########################################################################################
@@ -67,9 +71,8 @@ jobs:
       # Upload the artifact
       - name: Upload artifact
         run: |
-          export TMPDIR=$(openssl rand -base64 12)
-          mkdir -p /share/$TMPDIR
-          cp -r save /share/$TMPDIR/
+          mkdir -p /share/$SHARE_DIR
+          cp -r save /share/$SHARE_DIR/
 
   ########################################################################################
   # Deploy the static HTML files to Github Pages.
@@ -87,7 +90,7 @@ jobs:
       # Download artifact
       - name: Download artifact
         run: |
-          cp -r /share/$TMPDIR/save ${{ github.workspace }}
+          cp -r /share/$SHARE_DIR/save ${{ github.workspace }}
       # Now we need to replace the pdoc generated HTML files with the docs/ folder.
       # Note: Github pages expects all of your HTML static files to reside in docs/
       - run: |
