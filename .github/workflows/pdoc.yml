@@ -64,6 +64,12 @@ jobs:
           mkdir -p save/pdocs
           export PYTHONPATH=${{ github.workspace }}
           nox -r -s pdoc
+      # Upload the artifact
+      - name: Upload artifact
+        run: |
+          export TMPDIR=$(openssl rand -base64 12)
+          mkdir -p /share/$TMPDIR
+          cp -r save /share/$TMPDIR/
 
   ########################################################################################
   # Deploy the static HTML files to Github Pages.
@@ -78,6 +84,10 @@ jobs:
       # We first need to checkout the repo for the code.
       - name: Checkout
         uses: actions/checkout@v4
+      # Download artifact
+      - name: Download artifact
+        run: |
+          cp -r /share/$TMPDIR/save ${{ github.workspace }}
       # Now we need to replace the pdoc generated HTML files with the docs/ folder.
       # Note: Github pages expects all of your HTML static files to reside in docs/
       - run: |
