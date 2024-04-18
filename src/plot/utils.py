@@ -1,6 +1,5 @@
 """Common plotting helper utility functions.  These functions assist in formatting, extracting, or displaying information from the Networkx graph.
 """
-
 import random
 
 import networkx as nx
