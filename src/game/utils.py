@@ -4,8 +4,8 @@ from copy import deepcopy
 import networkx as nx
 
 
-def add_node_aliasing(G: nx.Graph, aliased_nodes: list):
-    """Add node aliasing information.
+def add_node_alias_info(G: nx.Graph, aliased_nodes: list):
+    """Add node aliasing information.  This is used to make it easier to decipher which nodes are aliased with other nodes.
 
     Args:
         G (nx.Graph): Networkx graph.
@@ -19,7 +19,7 @@ def add_node_aliasing(G: nx.Graph, aliased_nodes: list):
         G.nodes[aliased_node]["aliases"] = current_node_aliases
 
 
-def add_edge_aliasing(G: nx.Graph, aliased_nodes: list, aliased_stats: list):
+def add_node_aliases(G: nx.Graph, aliased_nodes: list, aliased_stats: list):
     """Used to ensure that edges of a list of nodes are properly aliased.  When two or more nodes are aliased it means that their edge probablity distributions must be equal.  An agent cannot distinguished between aliased nodes and therefore must have a common set of probability distributions across aliased nodes.
 
     Args:
@@ -49,10 +49,8 @@ def add_edge_aliasing(G: nx.Graph, aliased_nodes: list, aliased_stats: list):
         ):
             current_edge_aliases = deepcopy(aliased_edges)
             current_edge_aliases.remove(aliased_edge)
-            str_edge_aliases = str(current_edge_aliases)  # must be string for GML
 
             aliased_stat["id"] = aliased_edge_id
-            aliased_stat["aliases"] = str_edge_aliases
             G.edges[aliased_edge]["s"] = aliased_stat
 
 
@@ -68,8 +66,8 @@ def add_aliasing(G: nx.Graph, aliased_nodes: list, aliased_stats: list):
         ValueError: Throws an error when the number of decision edges do not match the number of `aliased_stats`.
     """
 
-    add_node_aliasing(G, aliased_nodes)
-    add_edge_aliasing(G, aliased_nodes, aliased_stats)
+    add_node_alias_info(G, aliased_nodes)
+    add_node_aliases(G, aliased_nodes, aliased_stats)
 
 
 def init_ev(G: nx.Graph):
@@ -104,4 +102,4 @@ def init_nodes(G: nx.Graph):
     """
     for node in G.nodes():
         if G.nodes[node].get("aliases") is None:
-            G.nodes[node]["aliases"] = []
+            G.nodes[node]["aliases"] = ""

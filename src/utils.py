@@ -67,7 +67,7 @@ def load_aliases(G: nx.Graph) -> dict[str, dict]:
 
     # Retrieve the aliases edges
     for u, v, data in G.edges(data=True):
-        if data["s"].get("aliases", False):
+        if data["s"].get("id", False):
             uuid = data["s"]["id"]
             alias_edges[uuid] = data["s"]
 
@@ -75,9 +75,9 @@ def load_aliases(G: nx.Graph) -> dict[str, dict]:
     for uuid, stats in alias_edges.items():
         for u, v, data in G.edges(data=True):
             # Link the data only if a matching uuid is found
-            check1 = data["s"].get("aliases", False)
-            check2 = data["s"].get("id", 0) == uuid
-            if check1 and check2:
+            check1 = data["s"].get("id", 0) == uuid
+
+            if check1:
                 data["s"] = stats
 
     return alias_edges

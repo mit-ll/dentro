@@ -29,7 +29,6 @@ def test_save_load_network():
     assert loaded_G.edges[("B1", "T1")]["action"] == "rock"
     assert loaded_G.edges[("B1", "T1")]["s"]["m"] == 1
     assert loaded_G.edges[("B1", "T1")]["s"]["n"] == 3
-    assert loaded_G.edges[("B1", "T1")]["s"]["aliases"] == "[('B3', 'T8'), ('B3', 'T9')]"
 
     # Modify an aliased edge
     for index, (uuid, aliased_edge) in enumerate(aliases.items()):
