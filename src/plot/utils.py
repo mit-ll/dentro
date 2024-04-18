@@ -1,5 +1,6 @@
 """Common plotting helper utility functions.  These functions assist in formatting, extracting, or displaying information from the Networkx graph.
 """
+
 import random
 
 import networkx as nx
@@ -62,9 +63,9 @@ def get_edge_attrs(G: nx.Graph) -> tuple[list, list, list]:
             edge_width = max((m / n * 5) ** 2, MIN_EDGE_WIDTH)
             edge_widths.append(edge_width)
 
-            if data["player"] == "red":
+            if data["player"] == "cat":
                 edge_colors.append("red")
-            elif data["player"] == "blue":
+            elif data["player"] == "dog":
                 edge_colors.append("blue")
             else:
                 edge_colors.append("grey")

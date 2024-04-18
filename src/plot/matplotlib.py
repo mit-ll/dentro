@@ -137,8 +137,8 @@ def add_expected_values(G: nx.Graph, pos: dict):
         x, y = pos[name]
 
         # Get expected values
-        ev_blue = round(data["ev"]["blue"], 2)
-        ev_red = round(data["ev"]["red"], 2)
+        ev_blue = round(data["ev"]["dog"], 2)
+        ev_red = round(data["ev"]["cat"], 2)
 
         # Plot on graph in textbox
         plt.text(

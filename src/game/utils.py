@@ -78,7 +78,7 @@ def init_ev(G: nx.Graph):
     """
     for node in G.nodes():
         if G.nodes[node].get("ev") is None:
-            G.nodes[node]["ev"] = {"blue": 0, "red": 0}
+            G.nodes[node]["ev"] = {"dog": 0, "cat": 0}
 
 
 def init_edges(G: nx.Graph):

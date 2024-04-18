@@ -19,40 +19,40 @@ def rock_paper_scissors() -> nx.Graph:
 
     # Red makes moves first
     G.add_edge(
-        "R1", "B1", type="decision", player="red", s={"m": 1, "n": 5}, action="rock"
+        "R1", "B1", type="decision", player="cat", s={"m": 1, "n": 5}, action="rock"
     )
     G.add_edge(
-        "R1", "B2", type="decision", player="red", s={"m": 3, "n": 5}, action="paper"
+        "R1", "B2", type="decision", player="cat", s={"m": 3, "n": 5}, action="paper"
     )
     G.add_edge(
-        "R1", "B3", type="decision", player="red", s={"m": 1, "n": 5}, action="scissors"
+        "R1", "B3", type="decision", player="cat", s={"m": 1, "n": 5}, action="scissors"
     )
 
     # Blue possible moves
-    G.add_edge("B1", "T1", type="decision", player="blue", action="rock")
-    G.add_edge("B1", "T2", type="decision", player="blue", action="paper")
-    G.add_edge("B1", "T3", type="decision", player="blue", action="scissors")
+    G.add_edge("B1", "T1", type="decision", player="dog", action="rock")
+    G.add_edge("B1", "T2", type="decision", player="dog", action="paper")
+    G.add_edge("B1", "T3", type="decision", player="dog", action="scissors")
 
-    G.add_edge("B2", "T4", type="decision", player="blue", action="rock")
-    G.add_edge("B2", "T5", type="decision", player="blue", action="paper")
-    G.add_edge("B2", "T6", type="decision", player="blue", action="scissors")
+    G.add_edge("B2", "T4", type="decision", player="dog", action="rock")
+    G.add_edge("B2", "T5", type="decision", player="dog", action="paper")
+    G.add_edge("B2", "T6", type="decision", player="dog", action="scissors")
 
-    G.add_edge("B3", "T7", type="decision", player="blue", action="rock")
-    G.add_edge("B3", "T8", type="decision", player="blue", action="paper")
-    G.add_edge("B3", "T9", type="decision", player="blue", action="scissors")
+    G.add_edge("B3", "T7", type="decision", player="dog", action="rock")
+    G.add_edge("B3", "T8", type="decision", player="dog", action="paper")
+    G.add_edge("B3", "T9", type="decision", player="dog", action="scissors")
 
     # Set terminal values
-    G.add_node("T1", ev={"blue": 0, "red": 0}, type="terminal")
-    G.add_node("T2", ev={"blue": 1, "red": -1}, type="terminal")
-    G.add_node("T3", ev={"blue": -1, "red": 1}, type="terminal")
+    G.add_node("T1", ev={"dog": 0, "cat": 0}, type="terminal")
+    G.add_node("T2", ev={"dog": 1, "cat": -1}, type="terminal")
+    G.add_node("T3", ev={"dog": -1, "cat": 1}, type="terminal")
 
-    G.add_node("T4", ev={"blue": -1, "red": 1}, type="terminal")
-    G.add_node("T5", ev={"blue": 0, "red": 0}, type="terminal")
-    G.add_node("T6", ev={"blue": 1, "red": -1}, type="terminal")
+    G.add_node("T4", ev={"dog": -1, "cat": 1}, type="terminal")
+    G.add_node("T5", ev={"dog": 0, "cat": 0}, type="terminal")
+    G.add_node("T6", ev={"dog": 1, "cat": -1}, type="terminal")
 
-    G.add_node("T7", ev={"blue": 1, "red": -1}, type="terminal")
-    G.add_node("T8", ev={"blue": -1, "red": 1}, type="terminal")
-    G.add_node("T9", ev={"blue": 0, "red": 0}, type="terminal")
+    G.add_node("T7", ev={"dog": 1, "cat": -1}, type="terminal")
+    G.add_node("T8", ev={"dog": -1, "cat": 1}, type="terminal")
+    G.add_node("T9", ev={"dog": 0, "cat": 0}, type="terminal")
 
     # Aliased nodes
     add_aliasing(

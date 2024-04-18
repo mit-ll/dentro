@@ -430,8 +430,8 @@ def networkx_datasync(G: nx.Graph, graph: Model) -> Model:
 
     for _, data in G.nodes(data=True):
         # Get expected values
-        ev_blue.append(round(data["ev"]["blue"], 2))
-        ev_red.append(round(data["ev"]["red"], 2))
+        ev_blue.append(round(data["ev"]["dog"], 2))
+        ev_red.append(round(data["ev"]["cat"], 2))
 
     for x, y, data in G.edges(data=True):
         try:  # Populate using data from Networkx graph

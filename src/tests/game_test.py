@@ -18,15 +18,15 @@ def test_setting_expected_values():
 
     # Initialize the game
     G = rock_paper_scissors()
-    players = ["blue", "red"]
+    players = ["dog", "cat"]
 
     # Assign a terminal value
     for _, data in G.nodes(data=True):
-        data["ev"]["blue"] = 0
-        data["ev"]["red"] = 0
+        data["ev"]["dog"] = 0
+        data["ev"]["cat"] = 0
 
-    G.nodes["T1"]["ev"]["blue"] = 100
-    G.nodes["T1"]["ev"]["red"] = 100
+    G.nodes["T1"]["ev"]["dog"] = 100
+    G.nodes["T1"]["ev"]["cat"] = 100
 
     # Update EV for each node
     update_node_evs(G, players)
@@ -41,12 +41,12 @@ def test_setting_expected_values():
 
     # Verify that exepcted values are correct
     assert np.isclose(
-        G.nodes["B1"]["ev"]["blue"],
+        G.nodes["B1"]["ev"]["dog"],
         prob_T1_B1 * 100,
     ), "Invalid EV update"
 
     assert np.isclose(
-        G.nodes["R1"]["ev"]["red"],
+        G.nodes["R1"]["ev"]["cat"],
         prob_T1_B1 * prob_B1_R1 * 100,
     ), "Invalid EV update"
 
@@ -103,7 +103,7 @@ def test_rock_paper_scissors():
 
     run_cfr(
         G,
-        players=["red", "blue"],
+        players=["cat", "dog"],
         n_iterations=10,
         n_rollouts=1000,
         save_path="save/rock-paper-scissors",

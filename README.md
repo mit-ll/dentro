@@ -81,7 +81,7 @@ def test_rock_paper_scissors():
 
     run_cfr(
         G,
-        players=["red", "blue"],              # players in the game
+        players=["cat", "dog"],              # players in the game
         n_iterations=10,                      # number of iterations to run
         n_rollouts=1000,                      # number of rollouts to perform per update
         save_path="save/rock-paper-scissors", # save path of files

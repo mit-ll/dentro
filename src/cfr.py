@@ -13,9 +13,7 @@ from src.utils import rollout
 from src.utils import save_networkx_graph
 
 
-def get_expected_value(
-    G: nx.Graph, target_node: str, id: Literal["red", "blue"]
-) -> float:
+def get_expected_value(G: nx.Graph, target_node: str, id: Literal["cat", "dog"]) -> float:
     """This function multiplies the probability distribution edges of one parent node to the expected values of its children nodes.  The output is the expected value for the specified target node.  This is a helper function for `src.cfr.update_node_evs`.
 
     .. note::
@@ -64,7 +62,7 @@ def update_node_evs(G: nx.Graph, players: list):
 
     Args:
         G (nx.Graph): Networkx graph.
-        players (list): A list of player ids (i.e. ["blue", "red"]).
+        players (list): A list of player ids (i.e. ["dog", "cat"]).
     """
 
     # Perform reverse recursive iterations
