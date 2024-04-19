@@ -4,19 +4,34 @@ from copy import deepcopy
 import networkx as nx
 
 
-def add_node_alias_info(G: nx.Graph, aliased_nodes: list):
-    """Add node aliasing information.  This is used to make it easier to decipher which nodes are aliased with other nodes.
+def add_node_aliases_v2(G: nx.Graph, aliased_nodes: list, aliased_stats: list):
+    """This function will first check whether the nodes being aliased are already aliased with other nodes.  If they have been aliased to other nodes, we need to create a global list that contains all of the nodes being aliased and re-initialize them to have a shared reference object.
 
     Args:
         G (nx.Graph): Networkx graph.
-        aliased_nodes (list): Nodes to be aliased.
+        aliased_nodes (list): A list of aliased nodes.
+        aliased_stats (list): These are the initial probabilities that are assigned to the aliased nodes.  It must be equal to the number of decision edges that are common across all aliased nodes.
+
+    Raises:
+        ValueError: Throws an error when the number of decision edges do not match the number of `aliased_stats`.
     """
-    # Assign alias links to the edge paths
+
+    all_aliased_nodes = deepcopy(aliased_nodes)
+
+    # Retrieve the list of aliases from the node's data store
     for aliased_node in aliased_nodes:
-        # Update nodes with alias information
-        current_node_aliases = deepcopy(aliased_nodes)
-        current_node_aliases.remove(aliased_node)
-        G.nodes[aliased_node]["aliases"] = current_node_aliases
+        if "aliases" in G.nodes[aliased_node]:
+            all_aliased_nodes += G.nodes[aliased_node]["aliases"]
+
+    # This is the refined set of all aliased nodes
+    all_aliased_nodes = list(set(all_aliased_nodes))
+
+    # Update the all nodes to have the aliasing information!
+    for aliased_node in aliased_nodes:
+        G.nodes[aliased_node]["aliases"] = all_aliased_nodes
+
+    # Update all nodes with shared objects
+    add_node_aliases(G, all_aliased_nodes, aliased_stats)
 
 
 def add_node_aliases(G: nx.Graph, aliased_nodes: list, aliased_stats: list):
@@ -66,7 +81,6 @@ def add_aliasing(G: nx.Graph, aliased_nodes: list, aliased_stats: list):
         ValueError: Throws an error when the number of decision edges do not match the number of `aliased_stats`.
     """
 
-    add_node_alias_info(G, aliased_nodes)
     add_node_aliases(G, aliased_nodes, aliased_stats)
 
 
