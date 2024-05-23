@@ -7,7 +7,6 @@
 *.excalidraw
 profile.html
 profile.json
-poetry.lock
 
 # Folders to ignore
 __pycache__
