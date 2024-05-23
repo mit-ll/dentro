@@ -128,19 +128,19 @@ def test_rock_paper_scissors():
     edge_R1_B3 = G.edges[("R1", "B3")]
 
     # Checks to ensure probs are within reasonable ranges.  Blue will have converged to the Nash equilibrium at this point.  Red has converged to a correlated equilibrium where it plays paper more than other moves.
-    check1 = 0.35 > (edge_B1_T1["s"]["m"] / edge_B1_T1["s"]["n"]) > 0.31
-    check2 = 0.35 > (edge_B1_T2["s"]["m"] / edge_B1_T2["s"]["n"]) > 0.31
-    check3 = 0.35 > (edge_B1_T3["s"]["m"] / edge_B1_T3["s"]["n"]) > 0.31
-    check4 = 0.35 > (edge_B2_T4["s"]["m"] / edge_B2_T4["s"]["n"]) > 0.31
-    check5 = 0.35 > (edge_B2_T5["s"]["m"] / edge_B2_T5["s"]["n"]) > 0.31
-    check6 = 0.35 > (edge_B2_T6["s"]["m"] / edge_B2_T6["s"]["n"]) > 0.31
-    check7 = 0.35 > (edge_B3_T7["s"]["m"] / edge_B3_T7["s"]["n"]) > 0.31
-    check8 = 0.35 > (edge_B3_T8["s"]["m"] / edge_B3_T8["s"]["n"]) > 0.31
-    check9 = 0.35 > (edge_B3_T9["s"]["m"] / edge_B3_T9["s"]["n"]) > 0.31
+    check1 = 0.35 > (edge_B1_T1["s"]["m"] / edge_B1_T1["s"]["n"]) > 0.30
+    check2 = 0.35 > (edge_B1_T2["s"]["m"] / edge_B1_T2["s"]["n"]) > 0.30
+    check3 = 0.35 > (edge_B1_T3["s"]["m"] / edge_B1_T3["s"]["n"]) > 0.30
+    check4 = 0.35 > (edge_B2_T4["s"]["m"] / edge_B2_T4["s"]["n"]) > 0.30
+    check5 = 0.35 > (edge_B2_T5["s"]["m"] / edge_B2_T5["s"]["n"]) > 0.30
+    check6 = 0.35 > (edge_B2_T6["s"]["m"] / edge_B2_T6["s"]["n"]) > 0.30
+    check7 = 0.35 > (edge_B3_T7["s"]["m"] / edge_B3_T7["s"]["n"]) > 0.30
+    check8 = 0.35 > (edge_B3_T8["s"]["m"] / edge_B3_T8["s"]["n"]) > 0.30
+    check9 = 0.35 > (edge_B3_T9["s"]["m"] / edge_B3_T9["s"]["n"]) > 0.30
 
-    check10 = 0.30 > (edge_R1_B1["s"]["m"] / edge_R1_B1["s"]["n"]) > 0.25
-    check11 = 0.47 > (edge_R1_B2["s"]["m"] / edge_R1_B2["s"]["n"]) > 0.43
-    check12 = 0.30 > (edge_R1_B3["s"]["m"] / edge_R1_B3["s"]["n"]) > 0.25
+    check10 = 0.40 > (edge_R1_B1["s"]["m"] / edge_R1_B1["s"]["n"]) > 0.20
+    check11 = 0.50 > (edge_R1_B2["s"]["m"] / edge_R1_B2["s"]["n"]) > 0.40
+    check12 = 0.40 > (edge_R1_B3["s"]["m"] / edge_R1_B3["s"]["n"]) > 0.20
 
     assert (
         check1

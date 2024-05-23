@@ -26,10 +26,6 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
-# Set shared directory variable
-env:
-  SHARE_DIR: $(openssl rand -base64 12)
-
 ##########################################################################################
 # Jobs
 ##########################################################################################
@@ -68,11 +64,12 @@ jobs:
           mkdir -p save/pdocs
           export PYTHONPATH=${{ github.workspace }}
           nox -r -s pdoc
-      # Upload the artifact
-      - name: Upload artifact
-        run: |
-          mkdir -p /share/
-          cp -rf save /share/
+      # Upload the artifact to the next job
+      - name: Upload pdoc artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: pdoc artifact
+          path: save
 
   ########################################################################################
   # Deploy the static HTML files to Github Pages.
@@ -87,10 +84,12 @@ jobs:
       # We first need to checkout the repo for the code.
       - name: Checkout
         uses: actions/checkout@v4
-      # Download artifact
-      - name: Download artifact
-        run: |
-          cp -rf /share/save ${{ github.workspace }}
+      # Now download the artifact from the previous build for pdoc.
+      - name: Download pdoc artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: pdoc artifact
+          path: save
       # Now we need to replace the pdoc generated HTML files with the docs/ folder.
       # Note: Github pages expects all of your HTML static files to reside in docs/
       - run: |
