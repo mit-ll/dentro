@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/destin-v">
-    <img src="https://camo.githubusercontent.com/8a5a84adae2071b1d131af237bc0a15253b91bb86b2761bbd62ed3c3ac7aabea/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d31794674652d5241534363463161686b5967314a79626176692d67576a65386b70" alt="drawing" width="500"/>
+    <img src="https://raw.githubusercontent.com/destin-v/destin-v/main/docs/pics/logo.gif" alt="drawing" width="500"/>
   </a>
 </p>
 
