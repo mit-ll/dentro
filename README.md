@@ -17,9 +17,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/destin-v/dentro/actions/workflows/pre-commit.yml">  <img alt="pre-commit" src="https://github.com/destin-v/dentro/actions/workflows/pre-commit.yml/badge.svg"></a>
-  <a href="https://github.com/destin-v/dentro/actions/workflows/pdoc.yml">        <img alt="pdoc"       src="https://github.com/destin-v/dentro/actions/workflows/pdoc.yml/badge.svg"></a>
-  <a href="https://github.com/destin-v/dentro/actions/workflows/pytest.yml">      <img alt="pytest"     src="https://github.com/destin-v/dentro/actions/workflows/pytest.yml/badge.svg"></a>
+  <a href="https://github.com/mit-ll/dentro/actions/workflows/pre-commit.yml">  <img alt="pre-commit" src="https://github.com/mit-ll/dentro/actions/workflows/pre-commit.yml/badge.svg"></a>
+  <a href="https://github.com/mit-ll/dentro/actions/workflows/pdoc.yml">        <img alt="pdoc"       src="https://github.com/mit-ll/dentro/actions/workflows/pdoc.yml/badge.svg"></a>
+  <a href="https://github.com/mit-ll/dentro/actions/workflows/pytest.yml">      <img alt="pytest"     src="https://github.com/mit-ll/dentro/actions/workflows/pytest.yml/badge.svg"></a>
 </p>
 
 Dentro is an implementation of Counter Factual Regret Minimization (CFRM).  It provides the basic building blocks needed to assemble your own graphs and solve the problem using the provided algorithm.  This repo shows CFRM applied to the game of rock-paper-scissors.
